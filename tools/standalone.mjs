@@ -8,6 +8,10 @@ const output = process.argv[2] ? resolve(process.argv[2]) : resolve(root, "dist"
 let html = await readFile(new URL("index.html", scene), "utf8");
 const css = await readFile(new URL("scene.css", scene), "utf8");
 html = html.replace('<link rel="stylesheet" href="./scene.css">', () => "<style>" + css + "</style>");
+const notices = await Promise.all(["../LICENSE", "../vendor/three-r160/LICENSE"].map(
+  path => readFile(new URL(path, import.meta.url), "utf8")
+));
+html = html.replace("</head>", () => "<!--\n" + notices.join("\n") + "\n-->\n</head>");
 const scripts = [];
 for (const tag of html.matchAll(/<script defer src="([^"]+)"><\/script>/g)) {
   scripts.push(await readFile(new URL(tag[1], scene), "utf8"));
