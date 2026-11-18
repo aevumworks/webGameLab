@@ -1,21 +1,19 @@
 import {buildCologne} from "../scenes/003-cologne-cathedral/cathedral.js";
+import {howl} from "../scenes/006-howls-moving-castle/parameters.js";
+import {buildCastle} from "../scenes/006-howls-moving-castle/castle.js";
+import {readBuildingCard} from "./read-card.js";
 import {giza} from "../scenes/005-giza-anubis/parameters.js";
 import {buildKhufu} from "../scenes/005-giza-anubis/pyramid.js";
 import {makeSurfaces} from "../scenes/005-giza-anubis/surfaces.js";
 const T = globalThis.THREE;
 const TAU = Math.PI * 2;
-export const buildings = { giza:giza.name, cologne:"科隆大教堂", walden:"瓦尔登小屋", zhaozhou:"赵州桥", qiniandian:"天坛祈年殿", yingxian:"应县木塔", pantheon:"罗马万神殿", "arc-paris":"巴黎凯旋门" };
+export const buildings = { howl:"哈尔的移动城堡", giza:giza.name, cologne:"科隆大教堂", walden:"瓦尔登小屋", zhaozhou:"赵州桥", qiniandian:"天坛祈年殿", yingxian:"应县木塔", pantheon:"罗马万神殿", "arc-paris":"巴黎凯旋门" };
 
 export async function readBuilding(id) {
+  if(id===howl.id)return howl;
   if(id===giza.id)return giza;
   if (!Object.hasOwn(buildings, id)) throw new Error("未知建筑 " + id);
-  const url = new URL("../knowledge/建筑/" + id + ".md", import.meta.url);
-  const response = await fetch(url);
-  if (!response.ok) throw new Error("建筑参数读取失败，HTTP " + response.status);
-  const note = await response.text();
-  const block = note.match(/^`{3}json\s*\n([\s\S]*?)\n`{3}/m);
-  if (!block) throw new Error("建筑卡缺少 JSON 参数 " + id);
-  return JSON.parse(block[1]);
+  return readBuildingCard(id);
 }
 
 const materials = new Map();
@@ -231,6 +229,7 @@ function arc(g,p,s) {
 }
 const builders={walden:cabin,zhaozhou:bridge,qiniandian:temple,yingxian:pagoda,pantheon,"arc-paris":arc};
 export function buildBuilding(card) {
+  if(card.id==="howl")return buildCastle(card).root;
   if(card.id===giza.id)return buildKhufu(card,makeSurfaces());
   if(card.id==="cologne")return buildCologne(card);
   const group=new T.Group(); group.name=card.name;
