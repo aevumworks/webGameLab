@@ -2,11 +2,21 @@
 
 用 Web 3D 程序建模的游戏场景作品库。这里收录可以走近、环绕观察的环境作品，关注模型轮廓、材质、光照和实时渲染。
 
-**[在线进入《雾港》](https://aevumworks.github.io/webGameLab/)**
+**[在线场景目录](https://aevumworks.github.io/webGameLab/)** · [Obsidian 建筑知识库](knowledge/00-工作台.md) · [按参数查看建筑模型](https://aevumworks.github.io/webGameLab/architecture/) · [分期索引](knowledge/制作/分期索引.md)
 
-## 雾港 · Fog Harbor
+## WGL-003 · 科隆大教堂 · Kölner Dom
+
+从西门广场仰望双塔，穿过中央门廊，沿木质长椅之间的通道向东行走。交叉部向南看是方格彩窗，继续穿过侧廊，可绕到三王圣龛和东端的七座礼拜堂。
+
+[第一人称参观](https://aevumworks.github.io/webGameLab/scenes/003-cologne-cathedral/) · [本期文件与操作](scenes/003-cologne-cathedral/) · [米制参数与史料](knowledge/建筑/cologne.md) · [历史图纸与实景摄影](scenes/003-cologne-cathedral/references/)
+
+![科隆大教堂中殿，视点位于两排长椅之间](scenes/003-cologne-cathedral/cover.jpg)
+
+## WGL-001 · 雾港 · Fog Harbor
 
 一座建在层状海崖上的灯塔岛。木梯从守灯人的小屋通向水边，栈桥上堆着渔具，旁边系着一条划艇。拖动镜头绕过岛背，可以看到塔后的窗洞、船屋和崖壁凸出的岩层。
+
+[在线环绕游览](https://aevumworks.github.io/webGameLab/scenes/fog-harbor/)
 
 ![从栈桥一侧望向灯塔和守灯人小屋，浏览器实时渲染](docs/fog-harbor.jpg)
 
@@ -34,9 +44,9 @@
 
 ### 本地观看
 
-克隆仓库或下载 ZIP，解压后双击根目录的 `index.html`。Three.js 已随仓库提供，浏览器需支持 WebGL。系统开启减少动态效果时，场景从暂停状态开始。
+克隆仓库或下载 ZIP，在仓库根目录运行 `node tools/preview.mjs 4182`，打开 [本机目录](http://127.0.0.1:4182/)。科隆大教堂和模型预览台通过 HTTP 读取建筑参数。Three.js 随仓库提供，浏览器需支持 WebGL。
 
-需要一个便于传送的离线文件时，在仓库根目录运行以下命令。
+需要便于传送的《雾港》离线文件时，在仓库根目录运行以下命令。
 
 ```sh
 node tools/standalone.mjs
@@ -48,4 +58,4 @@ node tools/standalone.mjs
 
 场景按 `scenes/<场景名>/` 归档。欢迎在 Issues 提交场景提案，或附上浏览器、设备与画面反馈渲染问题。新增场景请提供源码入口，以及从实际渲染器截取的预览。主分支由 GitHub Pages 展示。
 
-项目采用 [MIT 许可证](LICENSE)。随仓库分发的 Three.js r160 保留[上游许可证](vendor/three-r160/LICENSE)。[Three.js 原始版本](https://github.com/mrdoob/three.js/tree/r160)
+本仓库原创代码采用 [MIT 许可证](LICENSE)。Three.js r160 保留[上游许可证](vendor/three-r160/LICENSE)。历史图纸与实景摄影的作者、原图和各自的许可见[科隆大教堂素材清单](scenes/003-cologne-cathedral/references/)。

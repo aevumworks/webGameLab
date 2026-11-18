@@ -1,0 +1,13 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#292829">
+<title>科隆大教堂 · Kölner Dom | webGameLab</title><meta name="description" content="从科隆大教堂的西立面走入五廊式长堂，第一人称参观双塔、哥特肋架拱顶和唱诗席回廊。">
+<link rel="icon" href="data:,"><link rel="stylesheet" href="./style.css"><script defer src="../../vendor/three-r160/three.min.js"></script><script type="module" src="./scene.js"></script></head>
+<body><main id="exhibit"><canvas id="world" tabindex="0" aria-label="科隆大教堂第一视角。WASD 行走，拖动画面环顾，M 选择参观位置。"></canvas><div class="shade" aria-hidden="true"></div>
+<header><a href="../../" class="catalog"><span>‹</span> 场景目录</a><nav><button id="time" title="切换天光" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v3m0 14v3M2 12h3m14 0h3M5 5l2.2 2.2m9.6 9.6L19 19M5 19l2.2-2.2m9.6-9.6L19 5"/></svg><span>日光</span></button><button id="places" title="选择参观位置（M）"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 5l6-2 6 2 6-2v16l-6 2-6-2-6 2zM9 3v16m6-14v16"/></svg>参观位置</button></nav></header>
+<section id="identity"><div class="kicker"><i></i> KÖLN · WGL–003</div><h1>科隆大教堂</h1><p lang="de">Kölner Dom</p></section>
+<section id="station"><span id="spot">中殿</span><button id="details" aria-label="查看此处建筑说明">建筑说明 <span>↗</span></button></section>
+<div id="controls">WASD 行走　·　拖动环顾　·　M 选点</div><div id="stick" aria-label="行走摇杆"><i></i></div>
+<div id="load" role="status">正在构建教堂…</div><div id="error" role="alert" hidden></div>
+<dialog id="visit"><div class="dialogtop"><h2>参观位置</h2><button class="close" aria-label="关闭">×</button></div><div id="stops"></div><p>WASD 或 ↑↓ 行走，Shift 快走。拖动或 ←→ 转向，Page Up / Down 抬头低头。H 隐藏界面。</p></dialog>
+<dialog id="facts"><div class="dialogtop"><small>建筑说明</small><button class="close" aria-label="关闭">×</button></div><h2></h2><em></em><p></p><a target="_blank" rel="noopener">资料来源 ↗</a></dialog>
+</main></body></html>
