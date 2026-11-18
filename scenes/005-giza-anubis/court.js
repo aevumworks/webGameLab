@@ -115,6 +115,7 @@ function createNaos(root,m,animal){
   wingedSun(structure,m,0,3.009,1.106,1.03);
   box(structure,m.basalt,0,.555,.08,1.84,.52,1.16);box(structure,m.bright,0,.839,.08,1.94,.054,1.20);
   batch(structure);
+  animal.name="Recumbent Anubis";g.name="Jackal cabinet";
   animal.rotation.y=-.99;animal.scale.setScalar(1.18);
   animal.position.set(.02,.878,.11);g.add(animal);
   const leaves=[];
@@ -138,14 +139,17 @@ function createNaos(root,m,animal){
   }
   const lamp=new T.PointLight(0xffd79c,15,6,2);lamp.position.set(0,2.44,.60);g.add(lamp);
   let target=0,amount=.012;
-  function update(dt){
-    amount=T.MathUtils.damp(amount,target,4.0,dt);
+  function setOpening(value){
+    amount=value;
     const a=.055+1.67*amount;
     leaves[0].rotation.y=-a;leaves[1].rotation.y=a;
+  }
+  function update(dt){
+    setOpening(T.MathUtils.damp(amount,target,4.0,dt));
     return Math.abs(target-amount)>.001;
   }
   update(0);
-  return {leaves,update,toggle(){target=target?0:1;return target===1;}};
+  return {leaves,update,setOpening,toggle(){target=target?0:1;return target===1;}};
 }
 function flames(root,m){
   const bowls=new T.Group();root.add(bowls);const tongues=[];
@@ -192,7 +196,7 @@ export function buildCourt(scene,m,[hero,animal]){
     if(columns.some(([x,z])=>(u-x)**2+(v-z)**2<.85**2))return false;
     return true;
   }
-  return {root,target,canStand,toggle:naos.toggle,
+  return {root,target,canStand,toggle:naos.toggle,setOpening:naos.setOpening,
     paving(x,z){const [u,v]=toCourt(x,z);return Math.abs(u)<11.08&&Math.abs(v)<13.06;},
     update(dt,t){fire(t);return naos.update(dt);}
   };

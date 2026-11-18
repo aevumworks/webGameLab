@@ -1,28 +1,11 @@
-import {giza} from "./parameters.js";
-import {makeSurfaces} from "./surfaces.js";
-import {buildKhufu} from "./pyramid.js";
-import {buildPlateau} from "./plateau.js";
-import {buildCourt} from "./court.js";
-import {buildPassages} from "./interior.js";
-import {lighting} from "./atmosphere.js";
+import {createStage} from "./stage.js";
 import {walk} from "./walk.js";
-import {loadSculptures} from "./rodin.js";
 const T=globalThis.THREE;
 
 async function start(){
-  const sculptures=loadSculptures();
   const canvas=document.querySelector("canvas"),still=new URLSearchParams(location.search).has("still");
   const coarse=matchMedia("(pointer: coarse)").matches||canvas.clientWidth<620;
-  const renderer=new T.WebGLRenderer({canvas,antialias:true,powerPreference:"high-performance",preserveDrawingBuffer:true});
-  renderer.debug.onShaderError=(gl,program,vs,fs)=>{throw Error([gl.getProgramInfoLog(program),gl.getShaderInfoLog(vs),gl.getShaderInfoLog(fs)].filter(Boolean).join("\n"));};
-  renderer.outputColorSpace=T.SRGBColorSpace;renderer.toneMapping=T.ACESFilmicToneMapping;
-  renderer.shadowMap.enabled=true;renderer.shadowMap.type=T.PCFSoftShadowMap;renderer.shadowMap.autoUpdate=false;
-  const scene=new T.Scene(),camera=new T.PerspectiveCamera(57,1,.048,2850);
-  const outdoors=new T.Group();scene.add(outdoors);
-  const surfaces=makeSurfaces(),outside=buildPlateau(outdoors,surfaces);
-  const pyramid=buildKhufu(giza,surfaces,true);outdoors.add(pyramid);
-  const fixtures=buildPassages(scene,surfaces),court=buildCourt(outdoors,surfaces,await sculptures);
-  const atmosphere=lighting(renderer,scene,fixtures,coarse);
+  const {renderer,scene,camera,outdoors,outside,pyramid,court,atmosphere}=await createStage(canvas,coarse);
   function toggleSun(){document.body.dataset.light=atmosphere.toggle()?"dusk":"day";}
   const visitor=walk(camera,canvas,court,outside.passable,toggleSun);
   let ratio=1;

@@ -41,11 +41,17 @@ jobs:
         env:
           MODELS: ${{ steps.models.outputs.rebuild }}
         run: |
-          sudo apt-get -qq update
-          sudo apt-get -qq install -y blender python3-pil
+          package_url='https://download.blender.org/release/Blender4.5/blender-4.5.3-linux-x64.tar.xz'
+          archive="$RUNNER_TEMP/blender.tar.xz"
+          curl -fsSL --retry 2 --max-time 240 "$package_url" -o "$archive"
+          echo "975c58fcb244273838534bba771e64ad87739216b0f9b39a888531a49a72d845  $archive" | sha256sum --check
+          mkdir -p "$RUNNER_TEMP/blender"
+          tar -xJf "$archive" --strip-components=1 -C "$RUNNER_TEMP/blender"
+          python3 -m venv "$RUNNER_TEMP/model-py"
+          "$RUNNER_TEMP/model-py/bin/python" -m pip install --disable-pip-version-check Pillow==11.3.0
           for kind in $MODELS; do
-            blender -b -t 2 --python-exit-code 1 --python "$SCENE/build/repair_model.py" -- "$kind" "$RUNNER_TEMP/giza-source/$kind.glb" "$RUNNER_TEMP/$kind.glb"
-            /usr/bin/python3 "$SCENE/build/web_model.py" "$kind" "$RUNNER_TEMP/$kind.glb" "$RUNNER_TEMP/giza-models/$kind-r1.glb"
+            "$RUNNER_TEMP/blender/blender" -b -t 2 --python-exit-code 1 --python "$SCENE/build/repair_model.py" -- "$kind" "$RUNNER_TEMP/giza-source/$kind.glb" "$RUNNER_TEMP/$kind.glb"
+            "$RUNNER_TEMP/model-py/bin/python" "$SCENE/build/web_model.py" "$kind" "$RUNNER_TEMP/$kind.glb" "$RUNNER_TEMP/giza-models/$kind-r1.glb"
           done
       - name: Assemble static site
         run: |

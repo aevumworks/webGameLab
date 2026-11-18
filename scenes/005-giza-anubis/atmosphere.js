@@ -43,9 +43,9 @@ export function lighting(renderer,scene,fixtures,coarse){
   const local=[0,1,2].map(()=>{const l=new T.PointLight(0xffb972,0,13,2);scene.add(l);return l;});
   const haze=new T.Color(0xbba487),cool=new T.Color(0x947d86);scene.fog=new T.FogExp2(haze,.00105);
   const focus=new T.Vector3(Infinity,0,0);let twilight=false,mix=-1,enclosed=false,lightCell="";
-  function update(cam,state,dt,propChanged=false){
+  function update(cam,state,dt,propChanged=false,evening){
     const indoor=state==="passage"||state==="gallery"||state==="antechamber"||state==="chamber";
-    const next=T.MathUtils.damp(Math.max(0,mix),twilight?1:0,2.1,dt);
+    const next=evening??T.MathUtils.damp(Math.max(0,mix),twilight?1:0,2.1,dt);
     const changed=Math.abs(next-mix)>.0007||indoor!==enclosed;
     if(changed){
       mix=next;shader.uniforms.evening.value=mix;shader.uniforms.sunDir.value.lerpVectors(day,dusk,mix).normalize();
