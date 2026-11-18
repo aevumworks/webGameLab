@@ -5,7 +5,8 @@ const T=globalThis.THREE;
 async function start(){
   const canvas=document.querySelector("canvas"),still=new URLSearchParams(location.search).has("still");
   const coarse=matchMedia("(pointer: coarse)").matches||canvas.clientWidth<620;
-  const {renderer,scene,camera,outdoors,outside,pyramid,court,atmosphere}=await createStage(canvas,coarse);
+  const clay=new URLSearchParams(location.search).get("view")==="clay";
+  const {renderer,scene,camera,outdoors,outside,pyramid,court,atmosphere}=await createStage(canvas,coarse,clay);
   function toggleSun(){document.body.dataset.light=atmosphere.toggle()?"dusk":"day";}
   const visitor=walk(camera,canvas,court,outside.passable,toggleSun);
   let ratio=1;
@@ -21,7 +22,7 @@ async function start(){
   const lastDetail=new T.Vector3(Infinity,0,0);
   function render(now){
     const dt=last?Math.min(.087,Math.max(.001,(now-last)/1000)):1/30;
-    last=now;t+=dt;const place=visitor.step(dt,reduced),moving=court.update(dt,reduced?0:t);
+    last=now;t+=dt;const place=visitor.step(dt,reduced),moving=court.update(dt,reduced?0:t,camera.position);
     outdoors.visible=!(place==="gallery"||place==="chamber"||place==="antechamber"||(place==="passage"&&camera.position.z<75));
     if(outdoors.visible&&lastDetail.distanceToSquared(camera.position)>1){
       lastDetail.copy(camera.position);pyramid.userData.updateDetail(lastDetail);outside.updateDetail(lastDetail);

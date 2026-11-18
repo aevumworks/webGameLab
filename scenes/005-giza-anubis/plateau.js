@@ -1,6 +1,7 @@
 import {giza} from "./parameters.js";
 import {seeded, hewnUnit, batch, box, mesh, poly, tau} from "./geometry.js";
 import {distantPyramid} from "./pyramid.js";
+import {buildNorthRoad,survey} from "./north-road.js";
 const T=globalThis.THREE, c=giza.design, cs=Math.cos(c.exhibitYaw),sn=Math.sin(c.exhibitYaw);
 export function toWorld(x,z){return [c.exhibitX+cs*x+sn*z,c.exhibitZ-sn*x+cs*z];}
 export function toCourt(x,z){x-=c.exhibitX;z-=c.exhibitZ;return [cs*x-sn*z,sn*x+cs*z];}
@@ -20,32 +21,47 @@ export function ground(x,z){
   const [u,v]=toCourt(x,z);h*=smooth(0,38,Math.max(Math.abs(u)-14,Math.abs(v)-17));
   // Keep the north staircase and the surveyed base on one level of bedrock.
   if(z>0)h*=smooth(0,35,Math.max(Math.abs(x-7)-16,z-150));
+  if(x>17&&x<173&&z>155&&z<232){
+    const apron=smooth(17,35,x)*(1-smooth(153,173,x))*smooth(155,172,z)*(1-smooth(218,232,z));
+    const crest=200+6*Math.sin(x*.042);
+    const bench=Math.exp(-((z-crest-8)**2)/46),wash=Math.exp(-((z-crest+7)**2)/26);
+    h+=apron*(1.53*bench-.78*wash+.24*Math.sin(.12*x+.075*z));
+  }
   for(const b of others){const dist=Math.max(Math.abs(x-b.x),Math.abs(z-b.z))-b.base*.51;h=T.MathUtils.lerp(b.y,h,smooth(0,55,dist));}
   return h-.06;
 }
 export function routeLine(){
-  const [x,z]=toWorld(0,-14);return [[x,z],[59,195],[29,171],[7.29,149]];
+  return [toWorld(0,-13.05),toWorld(0,-19),[166,212],[148,205],[124,200],[99,199],[76,195],
+    [59,188],[40,174],[21,164],[7.29,155],[7.29,150]];
 }
 const path=routeLine();
+export const northRoad=survey(path);
+const approach=[[4,41],[2.5,27],[-.2,13]].map(([x,z])=>toWorld(x,z));
 function distanceToPath(x,z){
   let best=Infinity;
-  for(let i=1;i<path.length;i++){
-    const [a,b]=path[i-1],[u,v]=path[i],dx=u-a,dz=v-b,t=T.MathUtils.clamp(((x-a)*dx+(z-b)*dz)/(dx*dx+dz*dz),0,1);
+  for(const lane of [path,approach])for(let i=1;i<lane.length;i++){
+    const [a,b]=lane[i-1],[u,v]=lane[i],dx=u-a,dz=v-b,t=T.MathUtils.clamp(((x-a)*dx+(z-b)*dz)/(dx*dx+dz*dz),0,1);
     best=Math.min(best,Math.hypot(x-a-t*dx,z-b-t*dz));
   }return best;
 }
 export function buildPlateau(scene,m){
   const rng=seeded(9544),field=new T.PlaneGeometry(3650,3650,240,240);
   field.rotateX(-Math.PI/2);const attr=field.attributes.position;
-  for(let i=0;i<attr.count;i++)attr.setY(i,ground(attr.getX(i),attr.getZ(i)));
+  // Concentrate terrain samples on the low escarpment and its walking surface.
+  function axis(value,stops){
+    const n=(value+1825)*240/3650;
+    let i=1;while(i<stops.length-1&&n>stops[i][0])i++;
+    const [a,p]=stops[i-1],[b,q]=stops[i];return p+(q-p)*(n-a)/(b-a);
+  }
+  const xs=[[0,-1825],[35,-450],[73,-10],[173,200],[205,480],[240,1825]];
+  const zs=[[0,-1825],[35,-460],[90,133],[162,247],[195,480],[240,1825]];
+  for(let i=0;i<attr.count;i++){
+    const x=axis(attr.getX(i),xs),z=axis(attr.getZ(i),zs);attr.setXYZ(i,x,ground(x,z),z);
+  }
   field.computeVertexNormals();const land=mesh(scene,field,m.sand);land.castShadow=false;
   for(const b of others){
-    const p=distantPyramid(b.base,b.original,b.height,m.limestone,b.rows,b.cap);p.position.set(b.x,b.y,b.z);scene.add(p);
-    if(b.cap){
-      const capBase=b.base*(1-b.cap/b.original);
-      const cap=distantPyramid(capBase,b.original-b.cap,b.height-b.cap,m.light,8,0);
-      cap.scale.set(1.006,1,1.006);cap.position.set(b.x,b.y+b.cap+.08,b.z);scene.add(cap);
-    }
+    const p=distantPyramid(b.base,b.original,b.height,b.cap?[m.limestone,m.light]:m.limestone,b.rows,b.cap);
+    p.position.set(b.x,b.y,b.z);scene.add(p);
   }
   const blocks=[],grounds=[],shelves=[],tiles=[],stoneGeo=hewnUnit(775);
   function store(x,y,z,w,h,d,angle,tint,target=blocks){target.push([x,y,z,w,h,d,angle,tint]);}
@@ -85,8 +101,9 @@ export function buildPlateau(scene,m){
     const k=rng(),size=k>.97?.65+rng()*1.15:.05+.41*rng()**2;
     store(x,ground(x,z)+size*.10,z,size*(.85+rng()),size*(.28+rng()*.26),size*(.7+rng()*.5),rng()*tau,.67+.39*rng(),grounds);
   }
-  for(let i=1;i<path.length;i++){
-    const [a,b]=path[i-1],[u,v]=path[i],dx=u-a,dz=v-b,len=Math.hypot(dx,dz),ang=Math.atan2(dx,dz),n=Math.ceil(len/2);
+  const lane=approach;
+  for(let i=1;i<lane.length;i++){
+    const [a,b]=lane[i-1],[u,v]=lane[i],dx=u-a,dz=v-b,len=Math.hypot(dx,dz),ang=Math.atan2(dx,dz),n=Math.ceil(len/2);
     for(let j=0;j<n;j++)for(let k=0;k<3;k++){
       const t=(j+.5)/n,lateral=(k-1)*1.18;
       const x=a+t*dx+lateral*dz/len,z=b+t*dz-lateral*dx/len;
@@ -107,9 +124,10 @@ export function buildPlateau(scene,m){
     }
   }
   instances(blocks,m.limestone,51);instances(grounds,m.paving,39);instances(shelves,m.limestone,0);scene.add(batch(ruins));
+  const roadPassable=buildNorthRoad(scene,m,northRoad,ground);
   return {
     passable(x,z){return !others.some(b=>Math.max(Math.abs(x-b.x),Math.abs(z-b.z))<b.base/2+.30) &&
-      !solid.some(b=>Math.abs(x-b.x)<b.w+.28&&Math.abs(z-b.z)<b.d+.28);},
+      !solid.some(b=>Math.abs(x-b.x)<b.w+.28&&Math.abs(z-b.z)<b.d+.28)&&roadPassable(x,z);},
     updateDetail(position){for(const [tile,squared] of tiles)tile.visible=tile.boundingSphere.center.distanceToSquared(position)<squared;}
   };
 }

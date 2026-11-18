@@ -109,18 +109,30 @@ function createNaos(root,m,animal){
     box(structure,m.blue,s*1.35,1.59,.984,.085,2.58,.10);
     for(let j=0;j<14;j++)box(structure,j%3===0?m.teal:m.gold,s*1.35,.36+j*.185,1.044,.071,.048,.016);
   }
-  for(const [y,w,d,h,mat] of [[2.90,3.17,2.09,.12,m.gold],[3.02,3.35,2.18,.15,m.blue],[3.14,3.58,2.35,.14,m.aged],[3.225,3.70,2.43,.060,m.bright]]){
-    box(structure,mat,0,y,0,w,h,d);
+  // A concave cavetto rises from the lintel and flares over all four faces.
+  box(structure,m.gold,0,2.90,0,3.23,.15,2.09);
+  const rings=[[2.965,1.61,1.045],[3.03,1.625,1.055],[3.12,1.66,1.08],
+    [3.22,1.73,1.135],[3.31,1.83,1.205],[3.39,1.95,1.29]];
+  for(let j=1;j<rings.length;j++){
+    const corners=([y,x,z])=>[[-x,y,z],[x,y,z],[x,y,-z],[-x,y,-z]];
+    const points=[...corners(rings[j-1]),...corners(rings[j])];
+    for(let i=0;i<4;i++){const k=(i+1)%4;poly(structure,j===1?m.aged:m.blue,[points[i],points[k],points[k+4],points[i+4]],[0,1,2,0,2,3]);}
   }
-  wingedSun(structure,m,0,3.009,1.106,1.03);
-  box(structure,m.basalt,0,.555,.08,1.84,.52,1.16);box(structure,m.bright,0,.839,.08,1.94,.054,1.20);
+  box(structure,m.aged,0,3.42,0,3.94,.085,2.61);
+  wingedSun(structure,m,0,3.20,1.17,1.12);
+  box(structure,m.basalt,0,.695,.31,1.62,.76,1.08);box(structure,m.bright,0,1.105,.31,1.71,.06,1.13);
   batch(structure);
   animal.name="Recumbent Anubis";g.name="Jackal cabinet";
   animal.rotation.y=-.99;animal.scale.setScalar(1.18);
-  animal.position.set(.02,.878,.11);g.add(animal);
+  animal.position.set(.02,1.137,.34);g.add(animal);
   const leaves=[];
   for(const s of [-1,1]){
     const hinge=new T.Group();g.add(hinge);hinge.position.set(s*1.234,.34,1.044);
+    for(const y of [.30,2.14]){
+      rod(hinge,m.bright,[0,y-.13,0],[0,y+.13,0],.042,.042,14);
+      box(hinge,m.aged,-s*.13,y,0,.25,.095,.115);
+      box(g,m.aged,s*1.33,y+.34,1.044,.21,.12,.11);
+    }
     let u=-s*.613;
     box(hinge,m.wood,u,1.23,0,1.223,2.45,.090);
     for(const y of [.17,1.19,2.26]){
@@ -144,12 +156,28 @@ function createNaos(root,m,animal){
     const a=.055+1.67*amount;
     leaves[0].rotation.y=-a;leaves[1].rotation.y=a;
   }
-  function update(dt){
-    setOpening(T.MathUtils.damp(amount,target,4.0,dt));
+  // Test the visitor's footprint against the two actual swinging leaves in cabinet coordinates.
+  function clearsLeaves(u,v,opening=amount){
+    const sx=u-shrine[0],sz=v-shrine[1],cos=Math.cos(shrineYaw),sin=Math.sin(shrineYaw);
+    const x=sx*cos-sz*sin,z=sx*sin+sz*cos-1.044,angle=.055+1.67*opening;
+    for(const s of [-1,1]){
+      const dx=-s*Math.cos(angle),dz=Math.sin(angle),px=x-s*1.234;
+      const along=T.MathUtils.clamp(px*dx+z*dz,0,1.225);
+      if((px-dx*along)**2+(z-dz*along)**2<.25**2)return false;
+    }
+    return true;
+  }
+  function update(dt,visitor){
+    const next=T.MathUtils.damp(amount,target,4.0,dt);
+    if(visitor&&Math.abs(next-amount)>.00001){
+      const [u,v]=toCourt(visitor.x,visitor.z);
+      if(!clearsLeaves(u,v,next)||!clearsLeaves(u,v,(amount+next)/2))return false;
+    }
+    setOpening(next);
     return Math.abs(target-amount)>.001;
   }
   update(0);
-  return {leaves,update,setOpening,toggle(){target=target?0:1;return target===1;}};
+  return {leaves,update,setOpening,clearsLeaves,toggle(){target=target?0:1;return target===1;}};
 }
 function flames(root,m){
   const bowls=new T.Group();root.add(bowls);const tongues=[];
@@ -165,7 +193,21 @@ export function buildCourt(scene,m,[hero,animal]){
   const root=new T.Group(),c=giza.design;root.position.set(c.exhibitX,0,c.exhibitZ);root.rotation.y=c.exhibitYaw;scene.add(root);
   const stone=new T.Group();root.add(stone);const rng=seeded(332);
   pave(stone,m,rng);
-  const columns=[[-8.75,-.60,3.56,true],[9.15,-6.85,3.24,true],[-8.80,-8.45,3.8,false],[9.16,4.65,3.43,false]];
+  // Two flush stone thresholds frame the walkable gap between cabinet and plinth.
+  for(const z of [1.6,-7.0])for(const dz of [-.09,.09]){
+    box(stone,m.basalt,-1.88,.212,z+dz,1.38,.014,.048);
+  }
+  // Flush border stones continue around the plinth and meet the outbound paving.
+  const aisle=[[-4.50,1.45],[-2.45,2.05],[-1.75,1.45],[-2.02,-7.8],[0,-13.1]];
+  for(let i=1;i<aisle.length;i++){
+    const [x,z]=aisle[i-1],[u,v]=aisle[i],dx=u-x,dz=v-z,len=Math.hypot(dx,dz),n=Math.ceil(len/1.45);
+    for(let j=0;j<n;j++)for(const side of [-1,1]){
+      const t=(j+.5)/n;
+      const curb=box(stone,m.red,x+t*dx+side*.78*dz/len,.209,z+t*dz-side*.78*dx/len,.13,.023,len/n-.024);
+      curb.rotation.y=Math.atan2(dx,dz);
+    }
+  }
+  const columns=[[-8.95,5.45,3.56,true],[9.15,-6.85,3.24,true],[-8.80,-8.45,3.8,false],[9.16,4.65,3.43,false]];
   for(const [x,z,h,complete] of columns)papyrusColumn(stone,m,x,z,h,complete);
   // Broken limestone enclosure: low enough to leave the north face and its silhouette visible.
   for(const s of [-1,1]){
@@ -192,12 +234,13 @@ export function buildCourt(scene,m,[hero,animal]){
     if(Math.abs(u-statue[0])<2.175*daisWidth+.22&&Math.abs(v-statue[1])<1.775*daisDepth+.22)return false;
     const sx=u-shrine[0],sz=v-shrine[1],a=Math.cos(shrineYaw),b=Math.sin(shrineYaw);
     if(Math.abs(sx*a-sz*b)<1.96&&Math.abs(sx*b+sz*a)<1.43)return false;
+    if(!naos.clearsLeaves(u,v))return false;
     if(Math.abs(Math.abs(u)-10.72)<.64&&v>-12&&v<12.25)return false;
     if(columns.some(([x,z])=>(u-x)**2+(v-z)**2<.85**2))return false;
     return true;
   }
   return {root,target,canStand,toggle:naos.toggle,setOpening:naos.setOpening,
     paving(x,z){const [u,v]=toCourt(x,z);return Math.abs(u)<11.08&&Math.abs(v)<13.06;},
-    update(dt,t){fire(t);return naos.update(dt);}
+    update(dt,t,visitor){fire(t);return naos.update(dt,visitor);}
   };
 }

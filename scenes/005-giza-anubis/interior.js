@@ -23,9 +23,9 @@ export function interiorAt(x,z){
   }
   const offset=Math.abs(x-cx);
   if(z>=stairEnd+.15||z<room.north-.16)return null;
-  if(z>=entranceZ && offset<1.77)return {floor:routeFloor(z),eye:1.66,place:"portal"};
+  if(z>=entranceZ && offset<1.77)return {floor:routeFloor(z),eye:1.09+.57*T.MathUtils.smoothstep(z,entranceZ+.5,entranceZ+4.2),place:"portal"};
   if(z<=entranceZ+.04 && z>=galleryNorth && offset<.63)return {floor:routeFloor(z),eye:1.09,place:"passage"};
-  if(z<=galleryNorth+.04 && z>=d.gallerySouthZ && offset<.85)return {floor:routeFloor(z),eye:1.66,place:"gallery"};
+  if(z<=galleryNorth+.04 && z>=d.gallerySouthZ && offset<.85)return {floor:routeFloor(z),eye:1.26+.40*T.MathUtils.smoothstep(z,d.gallerySouthZ+.3,d.gallerySouthZ+2.5),place:"gallery"};
   if(z<=d.gallerySouthZ+.04&&offset<.59)return {floor:highFloor,eye:1.26,place:"antechamber"};
   return null;
 }

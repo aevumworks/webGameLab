@@ -15,7 +15,7 @@ function elevations(n,h,seed){
 }
 
 function tierShell(base,original,levels,material,opening=false,inset=0,casing=Infinity){
-  const p=[],idx=[],tier=[];let course=0;
+  const p=[],idx=[],tier=[];let course=0,casingIndex=0;
   function quad(a,b,c,d,ledge=false){const i=p.length/3;p.push(...a,...b,...c,...d);idx.push(i,i+1,i+2,i,i+2,i+3);
     tier.push(course,ledge?1:0,course,ledge?1:0,course,1,course,1);}
   const r=y=>Math.max(.15,base*.5*(1-y/original)-inset);
@@ -23,6 +23,7 @@ function tierShell(base,original,levels,material,opening=false,inset=0,casing=In
   for(let row=0;row<levels.length-1;row++){
     course=row;
     const y=levels[row],top=levels[row+1],a=r(y),b=r(top),smooth=y>=casing;
+    if(smooth&&!casingIndex)casingIndex=idx.length;
     for(let side=0;side<4;side++){
       const gap=opening && side===0 && top>giza.documented.entranceY-.45 && y<giza.documented.entranceY+8;
       const spans=gap?[[-1,(mouthX-2.7)/a],[(mouthX+2.7)/a,1]]:[[-1,1]];
@@ -35,10 +36,16 @@ function tierShell(base,original,levels,material,opening=false,inset=0,casing=In
   }
   const top=levels[levels.length-1],a=r(top);quad([-a,top,a],[a,top,a],[a,top,-a],[-a,top,-a],true);
   const geom=new T.BufferGeometry();geom.setAttribute("position",new T.Float32BufferAttribute(p,3));geom.setAttribute("courseUV",new T.Float32BufferAttribute(tier,2));geom.setIndex(idx);geom.computeVertexNormals();
+  if(Array.isArray(material)){
+    geom.addGroup(0,casingIndex,0);geom.addGroup(casingIndex,idx.length-casingIndex,1);
+  }
   const item=new T.Mesh(geom,material);item.castShadow=item.receiveShadow=true;return item;
 }
 export function distantPyramid(base,original,height,material,rows,cap=Infinity){
   const g=new T.Group(),levels=elevations(rows,height,rows*11);
+  if(cap>0&&cap<height){
+    levels.push(cap);levels.sort((a,b)=>a-b);
+  }
   g.add(tierShell(base,original,levels,material,false,0,cap));
   return g;
 }
@@ -93,6 +100,16 @@ export function buildKhufu(card,mat,individual=true){
   }
   box(portal,mat.limestone,mouthX-1.91,p.entranceY+1.05,entranceZ-.11,1.08,2.14,2.4);
   box(portal,mat.limestone,mouthX+1.91,p.entranceY+1.05,entranceZ-.11,1.08,2.14,2.4);
+  // Fill the masonry behind the relieving chevrons, leaving the low corridor open.
+  box(portal,mat.limestone,mouthX,p.entranceY+3.06,entranceZ-1.98,5.8,2.84,3.4);
+  for(const side of [-1,1])box(portal,mat.limestone,mouthX+side*1.98,p.entranceY+.68,entranceZ-1.80,2.04,2.45,3.5);
+  // Three recessed courses close the cut behind the upper gables; their faces follow the pyramid batter.
+  for(let row=0;row<3;row++){
+    const rise=4.46+row*1.22;
+    const z=entranceZ-rise*p.base/(2*p.originalHeight)-.95;
+    for(const side of [-1,1])box(portal,mat.limestone,mouthX+side*1.56,p.entranceY+rise+.61,z,3.11,1.23,2.3);
+  }
+  for(const side of [-1,1])box(portal,mat.light,mouthX+side*2.67,p.entranceY+2.25,entranceZ-.94,1.36,.50,2.81);
   group.add(batch(portal));
   group.userData.updateDetail=position=>{
     for(const part of nearby){

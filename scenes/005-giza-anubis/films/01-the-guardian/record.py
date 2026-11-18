@@ -32,7 +32,7 @@ class Handler(BaseHandler):
             return model.open("rb")
         return super().send_head()
 
-def main():
+def main(edition=EDITION):
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument("--ffmpeg",default="ffmpeg")
     p.add_argument("--port",type=int,default=4195)
@@ -46,7 +46,7 @@ def main():
     handler=partial(Handler,directory=str(ROOT))
     with ThreadingHTTPServer(("127.0.0.1",options.port),handler) as server:
         server.recording=rec;server.models=options.models.resolve()
-        page=EDITION.relative_to(ROOT).as_posix()
+        page=edition.relative_to(ROOT).as_posix()
         print(f"http://127.0.0.1:{server.server_port}/{page}/index.html?capture&record={rec.key}",flush=True)
         try:server.serve_forever()
         finally:rec.close()

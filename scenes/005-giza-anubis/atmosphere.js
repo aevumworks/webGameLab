@@ -42,20 +42,23 @@ export function lighting(renderer,scene,fixtures,coarse){
   shadow.mapSize.setScalar(coarse?1024:2048);shadow.bias=-.00027;shadow.normalBias=.034;shadow.radius=2;
   const local=[0,1,2].map(()=>{const l=new T.PointLight(0xffb972,0,13,2);scene.add(l);return l;});
   const haze=new T.Color(0xbba487),cool=new T.Color(0x947d86);scene.fog=new T.FogExp2(haze,.00105);
-  const focus=new T.Vector3(Infinity,0,0);let twilight=false,mix=-1,enclosed=false,lightCell="";
+  const focus=new T.Vector3(Infinity,0,0);let twilight=false,mix=-1,enclosed=false,shade=-1,lightCell="";
   function update(cam,state,dt,propChanged=false,evening){
     const indoor=state==="passage"||state==="gallery"||state==="antechamber"||state==="chamber";
     const next=evening??T.MathUtils.damp(Math.max(0,mix),twilight?1:0,2.1,dt);
-    const changed=Math.abs(next-mix)>.0007||indoor!==enclosed;
+    const shelter=state==="portal"||state==="passage"?1-T.MathUtils.smoothstep(cam.position.z,95,110):Number(indoor);
+    const changed=Math.abs(next-mix)>.0007||indoor!==enclosed||Math.abs(shelter-shade)>.002;
     if(changed){
       mix=next;shader.uniforms.evening.value=mix;shader.uniforms.sunDir.value.lerpVectors(day,dusk,mix).normalize();
       scene.environment=indoor?null:(mix>.5?envDusk.texture:envDay.texture);
-      hemi.color.setHex(indoor?0xc1bbaf:0xbfd2e5);
-      hemi.groundColor.setHex(indoor?0x765344:0x91745b);hemi.intensity=indoor?.32:.74-.18*mix;
-      sun.intensity=indoor?.08:3.12-1.49*mix;
+      shade=shelter;
+      hemi.color.setHex(0xbfd2e5).lerp(new T.Color(0xc1bbaf),shade);
+      hemi.groundColor.setHex(0x91745b).lerp(new T.Color(0x765344),shade);
+      hemi.intensity=T.MathUtils.lerp(.74-.18*mix,.40,shade);
+      sun.intensity=T.MathUtils.lerp(3.12-1.49*mix,.08,shade);
       sun.color.setHex(0xffd4a2).lerp(new T.Color(0xffa46e),mix);
-      scene.fog.color.copy(haze).lerp(cool,mix);scene.fog.density=indoor?.0016:.00082+.00035*mix;
-      renderer.toneMappingExposure=indoor?1.12:.94+.03*mix;enclosed=indoor;
+      scene.fog.color.copy(haze).lerp(cool,mix);scene.fog.density=T.MathUtils.lerp(.00061+.00035*mix,.0016,shade);
+      renderer.toneMappingExposure=T.MathUtils.lerp(.94+.03*mix,1.15,shade);enclosed=indoor;
     }
     const pos=cam.position;sky.position.copy(pos);
     if(changed||propChanged||focus.distanceToSquared(pos)>70){

@@ -6,11 +6,12 @@ import {buildCourt} from "./court.js";
 import {buildPassages} from "./interior.js";
 import {lighting} from "./atmosphere.js";
 import {loadSculptures} from "./rodin.js";
+import {clayLighting} from "./clay.js";
 
 const T=globalThis.THREE;
 
 // The film and the walking tour instantiate the same geometry, PBR assets, lighting and shadow maps.
-export async function createStage(canvas,coarse){
+export async function createStage(canvas,coarse,clay=false){
   const sculptures=loadSculptures();
   const renderer=new T.WebGLRenderer({canvas,antialias:true,powerPreference:"high-performance",preserveDrawingBuffer:true});
   renderer.debug.onShaderError=(gl,program,vs,fs)=>{throw Error([gl.getProgramInfoLog(program),gl.getShaderInfoLog(vs),gl.getShaderInfoLog(fs)].filter(Boolean).join("\n"));};
@@ -21,6 +22,6 @@ export async function createStage(canvas,coarse){
   const surfaces=makeSurfaces(),outside=buildPlateau(outdoors,surfaces);
   const pyramid=buildKhufu(giza,surfaces,true);outdoors.add(pyramid);
   const fixtures=buildPassages(scene,surfaces),court=buildCourt(outdoors,surfaces,await sculptures);
-  const atmosphere=lighting(renderer,scene,fixtures,coarse);
+  const atmosphere=clay?clayLighting(renderer,scene,coarse):lighting(renderer,scene,fixtures,coarse);
   return {renderer,scene,camera,outdoors,outside,pyramid,court,atmosphere};
 }

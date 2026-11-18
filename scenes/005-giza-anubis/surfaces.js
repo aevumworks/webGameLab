@@ -109,7 +109,7 @@ function finish(material,type) {
         `:`
         float west=exp(-.21*abs(geWorld.x+.37)), low=exp(-.32*abs(geWorld.y-43.8));
         float wall=.35+.65*max(0.,dot(normW,normalize(vec3(.75,.44,.49))));
-        outgoingLight+=diffuseColor.rgb*(vec3(.065,.058,.057)+vec3(.34,.205,.13)*west*low*wall);
+        outgoingLight+=diffuseColor.rgb*(vec3(.092,.081,.073)+vec3(.38,.24,.16)*west*low*wall);
         `;
       shader.fragmentShader=shader.fragmentShader.replace("#include <opaque_fragment>",bounce+"\n#include <opaque_fragment>");
     }

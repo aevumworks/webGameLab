@@ -2,9 +2,10 @@ import {giza} from "./parameters.js";
 import {ground,toWorld} from "./plateau.js";
 import {entranceZ,mouthX} from "./pyramid.js";
 import {chamberView,coffer,galleryNorth,highFloor,interiorAt,routeFloor} from "./interior.js";
-const T=globalThis.THREE,keys=new Set();
+const T=globalThis.THREE;
 const stops=["court","guardian","shrine","portal","gallery","chamber","plateau"];
-export function walk(camera,canvas,court,canWalkOutside,changeSun){
+export function walk(camera,canvas,court,canWalkOutside,changeSun,playback=false){
+  const keys=new Set();
   const xy=new T.Vector2(), touch=new Map(),ray=new T.Raycaster();
   let yaw=0,pitch=0,foot=0,eye=1.67,place="court",checkpoint="court",phase=0,drag=null,stick=null,pair=null,lastTap=null;
   let blockMouseClick=false,lastTouchEnd=-Infinity;
@@ -32,12 +33,13 @@ export function walk(camera,canvas,court,canWalkOutside,changeSun){
       const across=(portrait,wide)=>T.MathUtils.lerp(portrait,wide,blend);
       at=inCourt(across(1.90,-2.55),across(16.8,15.0),0);
       look=inCourt(across(1.83,-4.30),across(-2.35,-2.60),across(8.00,8.61));
-    }else if(id==="guardian"){at=inCourt(-5.90,9.75,0);look=inCourt(3.00,-1.05,12.05);}
+    }else if(id==="entry"){at=inCourt(4,39,0);look=inCourt(.5,-4,7);}
+    else if(id==="guardian"){at=inCourt(-5.90,9.75,0);look=inCourt(3.00,-1.05,12.05);}
     else if(id==="shrine"){at=inCourt(-4.43,.94,0);look=court.target.toArray();}
     else if(id==="portal"){at=[mouthX,0,157];look=[mouthX,18.9,entranceZ-1];}
     else if(id==="gallery"){at=[mouthX,0,galleryNorth-2];look=[mouthX,routeFloor(galleryNorth-21)+3.35,galleryNorth-21];}
     else if(id==="chamber"){at=[chamberView.x,0,chamberView.z];look=[coffer.x+.12,highFloor+1.23,coffer.z];}
-    else if(id==="plateau"){at=[315,0,205];look=[-36,45,-43];}
+    else if(id==="plateau"){at=[305,0,42];look=[-160,43,-161];}
     else return;
     const s=surface(at[0],at[2]);if(!s)throw Error("Unreachable viewpoint "+id);
     reset();xy.set(at[0],at[2]);foot=s.floor;eye=s.eye;place=s.place;checkpoint=id;phase=0;
@@ -54,6 +56,7 @@ export function walk(camera,canvas,court,canWalkOutside,changeSun){
     }
     document.body.dataset.shrine=court.toggle()?"open":"closed";return true;
   }
+  if(playback)return {moveTo,step,keys,look(y,p){yaw=y;pitch=p;}};
   const recognized=["KeyW","KeyS","KeyA","KeyD","ShiftLeft","ShiftRight","ArrowLeft","ArrowRight","ArrowUp","ArrowDown","PageUp","PageDown"];
   window.addEventListener("keydown",e=>{
     if(e.altKey||e.ctrlKey||e.metaKey)return;
@@ -142,6 +145,7 @@ export function walk(camera,canvas,court,canWalkOutside,changeSun){
   }
   document.body.dataset.shrine="closed";
   const hash=()=>location.hash.slice(1);
-  moveTo(stops.includes(hash())?hash():"court");window.addEventListener("hashchange",()=>moveTo(stops.includes(hash())?hash():"court"));
+  function enter(){moveTo(stops.includes(hash())?hash():"entry");}
+  enter();window.addEventListener("hashchange",enter);
   return {step,frame};
 }
