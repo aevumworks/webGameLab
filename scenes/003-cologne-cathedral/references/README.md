@@ -1,6 +1,6 @@
 # 科隆大教堂 · 建模参考素材
 
-绘制范围包括西立面、纵向柱网和东端唱诗席。下列文件是原图等比例缩小后转为 WebP 的副本，供比对几何、辨认材料与核对署名。浏览器中的建筑、石材、彩窗和金工均由代码生成。
+下表收录用于西立面、纵向柱网和东端唱诗席的原图等比缩览。街区测绘、用于材质的授权摄影和石材扫描另记于本页。
 
 | 缩览 | 作者与年代 | 用途 | 原图与许可 |
 | --- | --- | --- | --- |
@@ -19,3 +19,22 @@
 - 建造史、五廊平面和三王圣龛参见[联合国教科文组织世界遗产档案](https://whc.unesco.org/en/list/292/)。南横厅彩窗参见[科隆大教堂艺术品档案](https://www.koelner-dom.de/kunstwerke/suedquerhausfenster)。
 
 [完整参数卡](../../../knowledge/建筑/cologne.md) · [本期游览](../)
+
+## 科隆街区的实测数据
+
+| 输入 | 制作与范围 | 原始出处 |
+| --- | --- | --- |
+| LoD2 CityGML | 瓦片 32/356/5645，下载目录标记 2026-05-26。截取 270 栋建筑，以分米量化存储 7,898 个表面。保留独立建筑标识、地面环、屋顶转折和庭院孔洞。教堂以独立的米制构件模型替代数据中的外壳 | [Geobasis NRW 产品档案](https://data.gov.de/suche/daten/3d-gebaudemodell-nw-lod28b9df) · [原始 GML](https://www.opengeodata.nrw.de/produkte/geobasis/3dg/lod2_gml/lod2_gml/LoD2_32_356_5645_1_NW.gml) |
+| DGM1 | 2022 年的 1 米地形，按 4 米步距抽样 13,431 个地面点，供地形网格与步行视点共用。建筑内部地坪独立控制 | [原始 GeoTIFF](https://www.opengeodata.nrw.de/produkte/geobasis/hm/dgm1_tiff/dgm1_tiff/dgm1_32_356_5645_1_nw_2022.tif) |
+| 彩色正射航片 DOP | WMS 图层 `nw_dop_rgb`。EPSG:25832，边界 `356270,5645010,356850,5645590`，2048 × 2048。转为 WebP，在测绘屋面上按地理坐标采样，并用作铺地底色 | [原始服务](https://www.wms.nrw.de/geobasis/wms_nw_dop?service=WMS&request=GetCapabilities) · [官方数据说明](https://data.gov.de/suche/daten/digitale-orthophotos-nwadd54) |
+
+数据提供者为 Land Nordrhein-Westfalen，Bezirksregierung Köln，Geobasis NRW。地理数据使用 [Datenlizenz Deutschland – Zero – Version 2.0](https://www.govdata.de/dl-de/zero-2-0)。教堂坐标轴以测绘塔尖配准，门槛附近地坪采用 DHHN2016 的 55.10 米。屋顶航片受拍摄日期、像素分辨率和原始阴影影响。街屋门窗、树木和广场设施按场景尺度复原。[科隆市 LoD2 说明](https://www.stadt-koeln.de/service/produkt/3d-gebaeudemodelle)
+
+## 立面与材质
+
+- **Domforum 上层窗格摄影**　© Raimond Spekking / CC BY-SA 4.0 (via Wikimedia Commons)。从 2021 年 Domplatte 拍摄的建筑照片截取两段无字上部立面，去除行人、广告与相邻建筑，对两面分别做透视校正、缩放与 WebP 编码。`survey/forum-east.webp`、`survey/forum-north.webp` 及使用这些裁片的场景截图沿用 CC BY-SA 4.0。[摄影原件](https://commons.wikimedia.org/wiki/File:Domforum,_K%C3%B6ln-2263.jpg) · [许可证](https://creativecommons.org/licenses/by-sa/4.0/) · [改造项目建筑资料](https://www.rsl.de/projekte-liste/domforum-koeln/)
+- **扫描石材**　Rob Tuytel，Poly Haven，*Large Sandstone Blocks*。采用 1K 颜色、OpenGL 法线和粗糙度，转换为 `ashlar-color.webp` 及法线 XY / 粗糙度打包纹理 `ashlar-normal-rough.webp`。用于模拟粗糙石面。大教堂历史石料包括粗面岩与砂岩，具体石块的产地和风化程度没有逐块测量。[原材质与 CC0](https://polyhaven.com/a/large_sandstone_blocks) · [科隆大教堂营造工坊的石材说明](https://www.koelner-dombauhuette.de/bauerhalt/gewerke/stein)
+- **车站与博物馆**　车站大厅跨度约 64 米、长约 255 米，钢肋以测绘端点定向。路德维希博物馆的锌板锯齿屋顶按测绘屋面分段补建，起伏深度与肋距为视觉复原取值。[莱茵地区历史建筑档案](https://www.rheinische-industriekultur.de/objekte/koeln/Hauptbahnhof/Hauptbahnhof.html) · [路德维希博物馆建筑档案](https://www.museum-ludwig.de/de/museum/das-museum/architektur)
+- **三王圣龛**　尺寸来自科隆旅游局。模型参考教堂艺术档案中鎏金、嵌宝和珐琅构件的说明，人物图像为独立的低起伏几何。[科隆旅游局](https://www.koelntourismus.de/kunst-kultur/sehenswuerdigkeiten/koelner-dom/innenraum) · [教堂艺术档案](https://www.koelner-dom.de/kunstwerke/dreikoenigenschrein)
+
+下载上述 GML、DGM1 GeoTIFF 和相同范围的 DOP JPEG 后，用 Python、NumPy 与 Pillow 运行 `python tools/compile_quarter.py 输入.gml 地形.tif 航片.jpg survey` 即可从本期目录重新生成街区。运行时全部资源随仓库提供。

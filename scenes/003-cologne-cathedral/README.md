@@ -1,34 +1,40 @@
-# WGL-003 · 科隆大教堂
+# WGL-003 · 科隆大教堂与主教座堂广场
 
-[进入第一人称参观](https://aevumworks.github.io/webGameLab/scenes/003-cologne-cathedral/) · [本机验收](http://127.0.0.1:4182/scenes/003-cologne-cathedral/) · [环绕观察模型](https://aevumworks.github.io/webGameLab/architecture/?model=cologne)
+[进入中殿](https://aevumworks.github.io/webGameLab/scenes/003-cologne-cathedral/) · [西门广场](https://aevumworks.github.io/webGameLab/scenes/003-cologne-cathedral/#west) · [Domforum 街景](https://aevumworks.github.io/webGameLab/scenes/003-cologne-cathedral/#square) · [中央车站](https://aevumworks.github.io/webGameLab/scenes/003-cologne-cathedral/#station) · [路德维希博物馆](https://aevumworks.github.io/webGameLab/scenes/003-cologne-cathedral/#museum)
 
-![从中殿长椅之间向东望，画面取自浏览器实时渲染](cover.jpg)
+![从木质长椅之间朝唱诗席眺望，浏览器实时渲染](cover.jpg)
 
-## 参观路线
+## 游览
 
-初始视点在中殿，面朝东方。选择「参观位置 → 西立面广场」可从室外开始。穿过中央门廊，沿两排长椅之间的通道进入交叉部。朝南看方格彩窗，再沿侧廊向东进入唱诗席回廊。东端的七座小礼拜堂呈扇形展开。任一位置都可停下查看建筑说明或切换日光、暮光。
+默认面朝中殿东端。想从门外进入，可以从西门广场沿中轴前进，穿过中央门廊。交叉部向南能看见方格彩窗，沿侧廊继续向东即可绕到三王圣龛。室外可走进大教堂与 Domforum、中央车站和路德维希博物馆之间的广场。
 
-| 操作 | 桌面 | 触屏 |
+| 体验 | 桌面 | 手机或平板 |
 | --- | --- | --- |
-| 行走 | W / S 前后，A / D 横移，Shift 快走 | 左下摇杆 |
-| 环顾 | 按住画面拖动。← / → 转向，Page Up / Down 调整仰俯 | 在摇杆以外的画面上拖动 |
-| 选点和资料 | M 打开位置列表，E 查看当前位置说明，Esc 关闭 | 点「参观位置」或「建筑说明」 |
-| 隐藏界面 | H；再按一次恢复 | 隐藏后双击画面可恢复 |
+| 行走 | WASD 或 ↑↓，Shift 快走 | 在画面左侧约四成区域按住，从按下的位置向想走的方向滑动 |
+| 环顾 | 按住并拖动，←→ 转向，Page Up / Down 改变仰俯角 | 在右侧拖动 |
+| 切换地点 | 数字 1–8 直达，M 循环 | 两指同时轻点 |
+| 日光与暮光 | L | 在右侧单指双击 |
 
-![从西门广场仰望两座透空尖塔](west-front.jpg)
+数字顺序为中殿、西门广场、西门廊、交叉部、唱诗席、Domforum 广场、车站、博物馆。画面始终只显示场景。进入链接可使用 `#nave`、`#west`、`#porch`、`#crossing`、`#choir`、`#square`、`#station` 或 `#museum`。
 
-## 模型与渲染
+![西立面双塔与相邻街区](west-front.jpg)
 
-[Obsidian 建筑卡](../../../knowledge/建筑/cologne.md)中的 JSON 直接驱动游览和模型预览台。一米对应一个世界单位。长堂内宽 45.19 米，中殿与侧廊拱顶净高分别为 43.35 米和 19.80 米。双塔按各自的官方高度放样。柱网轴线按历史平面图换算。起拱线、窗槛和人眼高度等复原取值在卡片中单独记录。[官方尺寸表](https://www.koelner-dom.de/erleben/der-dom-in-zahlen)
+## 比例与资料
 
-| 文件 | 内容 |
-| --- | --- |
-| [interior.js](interior.js) | 五廊柱网、四分肋架拱顶、三层立面、唱诗席、圣龛和放射礼拜堂 |
-| [exterior.js](exterior.js) | 西立面门廊、双塔、镂空尖塔、屋脊小塔和双层飞扶壁 |
-| [masonry.js](masonry.js) / [glass.js](glass.js) | 合批的三维构件、石材接缝和风化、铅条与彩窗图案 |
-| [light.js](light.js) / [scene.js](scene.js) | 天光、阴影、体积光束近似、亮度切换和静止画面重绘控制 |
-| [walk.js](walk.js) | 1.66 米人眼视点、门洞与陈设碰撞、键盘和触控漫游 |
+[Obsidian 参数卡](../../../knowledge/建筑/cologne.md)驱动教堂的游览与建筑预览台。一世界单位对应一米。中殿拱顶净高 43.35 米，侧廊 19.80 米，南北塔高分别为 157.22 和 157.18 米。五廊柱网参考历史平面图，西立面和飞扶壁以正立面图与唱诗席剖面为依据。三王圣龛按长 2.20 米、宽 1.10 米、高 1.53 米重建。[教堂官方尺寸表](https://www.koelner-dom.de/erleben/der-dom-in-zahlen) · [科隆旅游局](https://www.koelntourismus.de/kunst-kultur/sehenswuerdigkeiten/koelner-dom/innenraum)
 
-石材与木材使用带粗糙度的 Three.js 标准材质，并以世界坐标绘制结构和纹理。窗玻璃随观察者所在的室内或室外改变透光观感。静态建筑仅在天光切换时重新生成阴影图。南横厅窗以独立配色和排列重新绘制，圣龛装饰与门廊雕塑按游览距离概括。广场周边街区作环境背景。本期为建筑游览复原。[Three.js 标准材质](https://threejs.org/docs/pages/MeshStandardMaterial.html) · [Three.js 阴影](https://threejs.org/manual/en/shadows.html)
+周边读取 Geobasis NRW 的 270 栋 LoD2 建筑，共 7,898 个屋面、墙面和地面，在同一坐标系叠合 1 米原始地形和正射航片。Domforum 的上层立面使用透视校正的现场摄影。中央车站以测绘轮廓和 255 × 64 米历史大厅复建玻璃与钢肋，博物馆的锌板锯齿屋顶按屋面分区构造。常规街屋窗框、街具、树木、室内石雕和原作彩窗图案采用参照复原。[建筑测绘数据](https://data.gov.de/suche/daten/3d-gebaudemodell-nw-lod28b9df) · [资料、许可与复建方法](references/)
 
-[查看三份历史图纸与两张实景摄影](references/) · [分期索引](../../../knowledge/制作/分期索引.md) · [体验与视频验收记录](../../../knowledge/制作/WGL-003%20科隆大教堂验收.md)
+![从大教堂西侧望向 Domforum，实景窗格贴合测绘几何](domforum.jpg)
+
+## 渲染与代码
+
+- [教堂结构](cathedral.js)、[内部](interior.js)、[西立面与外部](exterior.js)、[圣龛](reliquary.js)生成束柱、四分肋架拱顶、尖塔、飞扶壁、彩窗洞口和陈设。
+- [石材着色](masonry.js)将扫描石材的颜色、微表面法线和粗糙度投射到世界坐标，近景能读出凿面与接缝。[玻璃](glass.js)表现独立的铅条和色片。彩光投影采取实时近似。
+- [光照](light.js)为日光与暮光分别生成预过滤天空环境反射，结合方向光阴影和局部补光。静止画面保留最后一次渲染。[Three.js 标准材质](https://threejs.org/docs/pages/MeshStandardMaterial.html) · [PMREM](https://threejs.org/docs/pages/PMREMGenerator.html)
+- [街区](quarter.js)、[地标](landmarks.js)和[广场设施](square.js)使用实测多边形、程序几何和实例化构件。[数据编译器](tools/compile_quarter.py)从公开的城市测绘文件生成随仓库分发的街区数据。
+- [漫游](walk.js)以 1.66 米人眼高度行走。室内响应石柱、墙面和长椅碰撞，室外跟随地形，并按建筑地面轮廓约束通行。
+
+![路德维希博物馆北面的锌板屋顶](ludwig.jpg)
+
+在仓库根目录执行 `node tools/preview.mjs 4182` 后可打开[本机体验](http://127.0.0.1:4182/scenes/003-cologne-cathedral/)。体验者亲自游览并明确同意后，再制作演示视频。[验收记录](../../../knowledge/制作/WGL-003%20科隆大教堂验收.md) · [分期索引](../../../knowledge/制作/分期索引.md)

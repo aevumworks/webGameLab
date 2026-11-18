@@ -1,4 +1,5 @@
 import {P,TAU,archY,archPoints,arcade,frameMap,lancet} from "./masonry.js";
+import {reliquary} from "./reliquary.js";
 const T=globalThis.THREE;
 export function panel(w,map,a,b,y0,y1,front,back,kind){
   const p=map(a,y0,front),q=map(b,y0,front),r=map(b,y1,front),s=map(a,y1,front);
@@ -62,7 +63,7 @@ function pew(w,x,z,width,side){
   for(const end of [-1,1]){const xx=x+end*(width/2-.11);w.box(xx,.36,z,.17,.68,.50,"ash");w.box(xx,.88,z+.14,.15,.64,.55,"oak");w.boss(P(xx,1.29,z+.24),.118,"oakLight");}
   w.block(x,z,width,.70);
 }
-function fittings(w,s){
+function fittings(w,s,doc){
   for(let i=0;i<18;i++){const z=-23.4-i*2.12;if(i===9)continue;for(const sign of [-1,1])pew(w,sign*4.33,z,4.5,sign);}
   for(const sign of [-1,1])for(let i=0;i<9;i++){
     const x=sign*4.87,z=-95.0-i*2.05;w.box(x,1.52,z,.29,3.05,1.94,"ash");w.box(x-sign*.47,.62,z,.80,.17,1.88,"oak");
@@ -70,15 +71,7 @@ function fittings(w,s){
     w.box(x,3.02,z,.98,.15,2.00,"oak");w.point(x,3.10,z,.89,.78,"ash",true);w.block(x-sign*.18,z,1.24,1.9);}
   const z=-113.5;
   w.box(0,.19,z,5.1,.36,2.38,"step");w.box(0,1.02,z,3.08,1.43,1.32,"shadow");w.box(0,1.80,z,3.82,.22,1.73,"step");w.block(0,z,4.22,1.97);
-  // Double-gabled reliquary behind the high altar, its gilded arcades seen from the ambulatory.
-  const az=z-3.3;w.box(0,.39,az,4.92,.76,2.68,"dark");w.box(0,.85,az,4.65,.18,2.56,"gold");
-  w.box(0,1.43,az,4.26,1.06,2.27,"gold");w.box(0,2.37,az,3.25,.71,1.12,"gold");
-  function gable(cx,cy,cz,ww,dd,h,kind){const x0=cx-ww/2,x1=cx+ww/2,z0=cz-dd/2,z1=cz+dd/2;
-    w.quad(P(x0,cy,z0),P(cx,cy+h,z0),P(cx,cy+h,z1),P(x0,cy,z1),kind);w.quad(P(cx,cy+h,z0),P(x1,cy,z0),P(x1,cy,z1),P(cx,cy+h,z1),kind);
-    for(const zz of [z0,z1])w.tri(P(x0,cy,zz),P(x1,cy,zz),P(cx,cy+h,zz),kind);}
-  gable(-1.01,1.98,az,2.15,2.34,.64,"gold");gable(1.01,1.98,az,2.15,2.34,.64,"gold");gable(0,2.78,az,3.31,1.35,.49,"gold");
-  for(const side of [-1,1])for(let i=0;i<9;i++){const x=-1.87+i*.47,zz=az+side*1.15;w.box(x,1.47,zz,.31,.62,.045,"enamel");w.boss(P(x,1.59,zz+side*.03),.10,"gold");w.cyl(x,1.34,zz+side*.03,.08,.25,"gold");}
-  w.block(0,az,4.95,2.7);
+  reliquary(w,doc.shrine,z-3.3);
   for(const sign of [-1,1])for(const zz of [-64,-92,-111]){
     const x=sign*(s.halfNave-.93);w.cyl(x,.115,zz,.33,.23,"iron");w.cyl(x,1.10,zz,.060,2.07,"gold");
     for(const n of [-1,0,1]){const xx=x+n*.31;w.beam(P(x,1.49,zz),P(xx,1.88,zz),.036,"gold");w.cyl(xx,2.0,zz,.042,.32,"web");w.boss(P(xx,2.195,zz),.056,"flame");}}
@@ -149,5 +142,5 @@ export function interior(w,doc,s){
     }
     const point=polar(wall-.6,t);w.box(point.x,.51,point.z,1.55,1.02,.77,"mould",Math.PI/2+t);w.block(point.x,point.z,1.55,.77,Math.PI/2+t);
   }
-  fittings(w,s);
+  fittings(w,s,doc);
 }

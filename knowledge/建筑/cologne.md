@@ -49,7 +49,8 @@
     "crossingTurret": 109.12,
     "naveVault": 43.35,
     "aisleVault": 19.8,
-    "ridge": 61.1
+    "ridge": 61.1,
+    "shrine": {"width": 1.10, "length": 2.20, "height": 1.53}
   },
   "design": {
     "rowZ": [
@@ -85,7 +86,7 @@
     "triforiumSill": 21.65,
     "clerestorySill": 27.1,
     "clerestoryHead": 39.7,
-    "towerCenters": 18.25,
+    "towerCenters": 15.955,
     "towerDepth": 20.8,
     "upperBelfry": 77.5,
     "spireBase": 99,
@@ -93,6 +94,16 @@
   }
 }
 ```
+
+石材采用 Rob Tuytel 的 CC0 砂岩实物扫描，向世界坐标投射颜色、法线和粗糙度，叠加有尺度的接缝与风化。两套预过滤天空环境分别照亮晴日和暮色，彩窗对石地的彩色投射属于实时近似。石料依据科隆大教堂营造工坊的历史材料说明选择。[扫描原件](https://polyhaven.com/a/large_sandstone_blocks) · [科隆大教堂营造工坊](https://www.koelner-dombauhuette.de/bauerhalt/gewerke/stein) · [环境贴图技术](https://threejs.org/docs/pages/PMREMGenerator.html)
+
+## 街区配准与陈设
+
+从 Geobasis NRW 的 CityGML 瓦片 32/356/5645 提取大教堂两座塔尖平面位置。塔心间距约 31.91 米，模型中轴距各塔 15.955 米。西门局部坐标原点采用 ETRS89 / UTM 32N 的 E 356477.59、N 5645284.27，DGM1 西门地坪约 55.10 米。室内沿用官方建筑尺寸。城市底模纳入 270 栋建筑的 7,898 个实测数据表面，4 米间距采样原始 1 米地形。周边建筑墙面与屋顶来自 LoD2，屋顶位置对应正射航片，立面精度逐项记录。[德国官方建筑数据](https://data.gov.de/suche/daten/3d-gebaudemodell-nw-lod28b9df) · [数据和许可](https://github.com/aevumworks/webGameLab/tree/main/scenes/003-cologne-cathedral/references)
+
+Domforum 沿街楼层参考现场摄影，窗格纹理由去除行人与文字的照片裁片透视校正而成。博物馆、车站与街屋保留测绘体量，其他窗洞、檐饰、树木和街具按实景参照放样。色彩、门窗逐扇形状与街具位置存在复原取值。建筑正门广场、北侧车站和东侧博物馆均有独立参观点。
+
+三王圣龛长 2.20 米、宽 1.10 米、高 1.53 米，位于高祭坛后方。双层拱龛、鎏金轮廓和珐琅装饰以几何重建，人物浮雕按游览距离概括。[科隆旅游局尺寸](https://www.koelntourismus.de/kunst-kultur/sehenswuerdigkeiten/koelner-dom/innenraum) · [教堂圣龛档案](https://www.koelner-dom.de/kunstwerke/dreikoenigenschrein)
 
 ## 放样顺序
 

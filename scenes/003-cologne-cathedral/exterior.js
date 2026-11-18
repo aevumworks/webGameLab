@@ -118,6 +118,19 @@ function tower(w,cx,doc,s,north){
       const points=[mp(-.49,height),...archPoints(mp,.49,height+.7,height+1.50,6),mp(.49,height)];w.line(points,.10,"pale");}
     for(const u of [-hh*.92,0,hh*.92])for(const h of [45.4,70.3]){
       const pp=map(u,h,1.0);finial(w,pp.x,pp.z,h,.65,5.35,"pale",true);}
+    // Slender shafts and stepped canopies break the long shadows across the tower piers.
+    for(const u of [-hh*.88,0,hh*.88]){
+      for(const [base,height,width] of [[7,12.4,.76],[23,19.2,.68],[49.8,18.8,.56]]){
+        const side=(v,y,d=0)=>map(u+v,y,1.12+d);
+        for(const off of [-width,0,width]){
+          const foot=side(off,base,.16),head=side(off,base+height,.16);
+          w.beam(foot,head,off===0?.115:.088,"face");
+          const q=side(off,base+height,.16);finial(w,q.x,q.z,q.y,.27,2.83,"face",true);
+        }
+        niche(w,map,u,base+2.1,height*.67,width*1.37,1.19);
+        openGable(w,(v,y,d=0)=>side(v,y,.37+d),width*2.7,base+height*.73,base+height+1.54);
+      }
+    }
     const l=map(-hh,76,.17),r=map(hh,76,.17);w.beam(l,r,.47,"face",true);
   }
   // Four bundled angle buttresses step inward as the solid tower turns into an octagonal belfry.

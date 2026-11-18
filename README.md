@@ -10,6 +10,8 @@
 
 [第一人称参观](https://aevumworks.github.io/webGameLab/scenes/003-cologne-cathedral/) · [本期文件与操作](scenes/003-cologne-cathedral/) · [米制参数与史料](knowledge/建筑/cologne.md) · [历史图纸与实景摄影](scenes/003-cologne-cathedral/references/)
 
+走出西门可以参观 [Domforum 广场](https://aevumworks.github.io/webGameLab/scenes/003-cologne-cathedral/#square)、[中央车站](https://aevumworks.github.io/webGameLab/scenes/003-cologne-cathedral/#station)和[路德维希博物馆](https://aevumworks.github.io/webGameLab/scenes/003-cologne-cathedral/#museum)。街区由 270 栋建筑的测绘数据重建。
+
 ![科隆大教堂中殿，视点位于两排长椅之间](scenes/003-cologne-cathedral/cover.jpg)
 
 ## WGL-001 · 雾港 · Fog Harbor
