@@ -1,18 +1,9 @@
-import {readBuilding} from "../../architecture/models.js";
-import {buildCologne} from "./cathedral.js";
-import {surroundings} from "./light.js";
+import {createCathedralStage} from "./stage.js";
 import {navigator3D} from "./walk.js";
 
 const T=globalThis.THREE,canvas=document.querySelector("#world");
 async function start(){
-  const renderer=new T.WebGLRenderer({canvas,antialias:true,powerPreference:"high-performance",preserveDrawingBuffer:true});
-  renderer.debug.onShaderError=(gl,program,v,f)=>{throw Error([gl.getProgramInfoLog(program),gl.getShaderInfoLog(v),gl.getShaderInfoLog(f)].filter(Boolean).join(" "));};
-  renderer.outputColorSpace=T.SRGBColorSpace;renderer.toneMapping=T.ACESFilmicToneMapping;renderer.toneMappingExposure=1.035;
-  renderer.shadowMap.enabled=true;renderer.shadowMap.type=T.PCFSoftShadowMap;renderer.shadowMap.autoUpdate=false;
-  const card=await readBuilding("cologne"),scene=new T.Scene(),camera=new T.PerspectiveCamera(67,1,.10,1000);
-  scene.fog=new T.FogExp2(0xc4c6c4,.0020);
-  const building=buildCologne(card);scene.add(building);
-  const environment=await surroundings(scene,building,renderer);
+  const {renderer,scene,camera,card,building,environment}=await createCathedralStage(canvas);
   let dirty=true,evening=false,ratio=1,slow=0;
   function toggleLight(){evening=!evening;environment.mode(evening);document.body.dataset.light=evening?"dusk":"day";dirty=true;}
   const walk=navigator3D(camera,canvas,building.userData.solids,card.design.eyeHeight,toggleLight);

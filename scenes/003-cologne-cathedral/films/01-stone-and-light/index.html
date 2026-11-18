@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#090909">
+  <title>石与光 · 科隆大教堂</title>
+  <link rel="icon" href="data:,">
+  <style>
+    html, body { height: 100%; margin: 0; background: #090909; }
+    video { display: block; width: 100%; height: 100%; object-fit: contain; }
+  </style>
+</head>
+<body>
+  <video autoplay muted playsinline loop preload="auto" tabindex="0" poster="cover.jpg"
+         src="wgl-003-01-stone-and-light.mp4" aria-label="石与光，科隆大教堂实机宣传片"></video>
+  <script type="module">
+    const screen = document.querySelector("video");
+    const toggle = () => screen.paused ? screen.play() : screen.pause();
+    screen.addEventListener("click", toggle);
+    window.addEventListener("keydown", event => {
+      if (event.code === "Space") {
+        event.preventDefault();
+        if (!event.repeat) toggle();
+      }
+      if (["ArrowLeft", "ArrowRight"].includes(event.code) && Number.isFinite(screen.duration)) {
+        event.preventDefault();
+        screen.currentTime = Math.max(0, Math.min(screen.duration, screen.currentTime + (event.code === "ArrowLeft" ? -5 : 5)));
+      }
+    });
+  </script>
+</body>
+</html>
