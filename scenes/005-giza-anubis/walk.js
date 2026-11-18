@@ -24,12 +24,14 @@ export function walk(camera,canvas,court,canWalkOutside,changeSun){
   }
   function pose(bob=0){camera.position.set(xy.x,foot+eye+bob,xy.y);camera.rotation.set(pitch,yaw,0,"YXZ");camera.updateMatrixWorld();}
   function moveTo(id){
-    const small=canvas.clientWidth/canvas.clientHeight<.86;
     let at,look;
     function inCourt(x,z,y){const [a,b]=toWorld(x,z);return [a,y,b];}
     if(id==="court"){
-      at=small?inCourt(1.90,16.8,0):inCourt(-2.55,15.0,0);
-      look=small?inCourt(1.06,-2.35,8.00):inCourt(-4.30,-2.60,8.61);
+      const aspect=canvas.clientWidth/canvas.clientHeight;
+      const blend=T.MathUtils.smoothstep(aspect,.74,1.65);
+      const across=(portrait,wide)=>T.MathUtils.lerp(portrait,wide,blend);
+      at=inCourt(across(1.90,-2.55),across(16.8,15.0),0);
+      look=inCourt(across(1.83,-4.30),across(-2.35,-2.60),across(8.00,8.61));
     }else if(id==="guardian"){at=inCourt(-5.90,9.75,0);look=inCourt(3.00,-1.05,12.05);}
     else if(id==="shrine"){at=inCourt(-4.43,.94,0);look=court.target.toArray();}
     else if(id==="portal"){at=[mouthX,0,157];look=[mouthX,18.9,entranceZ-1];}
