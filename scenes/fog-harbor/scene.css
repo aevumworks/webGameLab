@@ -1,0 +1,71 @@
+:root {
+  color-scheme: dark;
+  --ivory: #f2e6cb;
+  --muted: #c1c7b9;
+  --gold: #ebc88e;
+  font-family: "Hedvig Letters Sans", "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+}
+* { box-sizing: border-box; }
+html, body { width: 100%; height: 100%; margin: 0; overflow: hidden; background: #102d38; }
+button { font: inherit; color: inherit; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+button:focus-visible, canvas:focus-visible { outline: 2px solid #ffe3a6; outline-offset: 3px; }
+button[hidden], [hidden] { display: none !important; }
+#scene { position: relative; width: 100%; height: 100%; height: 100dvh; overflow: hidden; isolation: isolate; color: var(--ivory); }
+#harbor, .shade { position: absolute; inset: 0; width: 100%; height: 100%; }
+#harbor { display: block; touch-action: none; cursor: grab; }
+#harbor:active { cursor: grabbing; }
+#harbor:focus-visible { outline-offset: -4px; }
+.shade { pointer-events: none; background: linear-gradient(0deg, rgba(3,17,25,.74), rgba(5,19,25,.20) 13%, transparent 33%); transition: opacity .25s; }
+.chrome {
+  position: absolute; inset: auto max(4.4vw, env(safe-area-inset-right)) max(4.4vh, env(safe-area-inset-bottom)) max(4.4vw, env(safe-area-inset-left));
+  display: flex; align-items: flex-end; justify-content: space-between; gap: 24px;
+  pointer-events: none; transition: opacity .22s ease;
+}
+.signature { display: flex; align-items: baseline; gap: 17px; text-shadow: 0 2px 17px #09232b; user-select: none; }
+h1 { margin: 0; font: 500 clamp(33px, 3.55vw, 62px)/1.12 "Noto Serif SC", "Noto Serif CJK SC", "STZhongsong", "Songti SC", SimSun, serif; letter-spacing: .09em; }
+.signature span { font: italic 400 clamp(15px, 1.18vw, 22px)/1.1 Baskervville, Georgia, serif; color: #e7dcc5; }
+.signature small { font-size: 11px; color: #e2dbc8; border-left: 1px solid #e7dcc56b; padding-left: 14px; }
+.instruments { display: flex; align-items: center; gap: 12px; pointer-events: auto; }
+.weather, .view-tools {
+  display: flex; align-items: center; padding: 3px; border: 1px solid rgba(233,223,195,.26); border-radius: 28px;
+  background: rgba(13,34,41,.82); box-shadow: 0 2px 12px rgba(5,22,29,.2);
+}
+.weather button, .icon-button {
+  display: inline-flex; justify-content: center; align-items: center; gap: 8px; height: 37px;
+  background: transparent; border: 0; color: var(--muted); border-radius: 22px;
+}
+.weather button { padding: 0 13px; font-size: 13px; line-height: 1; }
+.weather button[aria-pressed="true"] { color: #1c3337; background: #ead7af; }
+.weather button:not([aria-pressed="true"]):hover, .icon-button:hover { background: #345058; color: #fff3d7; }
+.sky-icon { position: relative; display: block; width: 14px; height: 14px; }
+.sky-icon.dusk { background: linear-gradient(currentColor,currentColor) center 10px/14px 1.5px no-repeat, linear-gradient(currentColor,currentColor) center 13px/9px 1px no-repeat; }
+.sky-icon.dusk::before { content: ""; position: absolute; left: 2px; top: 3px; width: 8px; height: 5px; border: 1.4px solid; border-bottom: 0; border-radius: 9px 9px 0 0; }
+.sky-icon.moon::before { content: ""; display: block; width: 9px; height: 11px; margin-left: 2px; border-radius: 55%; box-shadow: -3px 2px 0 0 currentColor; transform: rotate(-23deg); }
+.sky-icon.rain { background: repeating-linear-gradient(116deg,transparent 0 3px,currentColor 3.4px 4.5px,transparent 4.8px 6px) center 9px/11px 4px no-repeat; }
+.sky-icon.rain::before { content: ""; position: absolute; top: 2px; left: 1px; width: 12px; height: 6px; border: 1.4px solid; border-radius: 8px; }
+.icon-button { width: 37px; }
+.icon-button i { display: block; position: relative; width: 15px; height: 15px; }
+#pause i { width: 10px; height: 12px; border-left: 3px solid; border-right: 3px solid; }
+#pause.paused i { width: 0; height: 0; border: 0; border-top: 6px solid transparent; border-bottom: 6px solid transparent; border-left: 10px solid; margin-left: 2px; }
+#fullscreen i { background: linear-gradient(currentColor,currentColor) 0 0/5px 1.5px,linear-gradient(currentColor,currentColor) 0 0/1.5px 5px,linear-gradient(currentColor,currentColor) 100% 0/5px 1.5px,linear-gradient(currentColor,currentColor) 100% 0/1.5px 5px,linear-gradient(currentColor,currentColor) 0 100%/5px 1.5px,linear-gradient(currentColor,currentColor) 0 100%/1.5px 5px,linear-gradient(currentColor,currentColor) 100% 100%/5px 1.5px,linear-gradient(currentColor,currentColor) 100% 100%/1.5px 5px; background-repeat: no-repeat; }
+#hide i { width: 15px; height: 10px; border: 1.5px solid; border-radius: 75% 22%; transform: rotate(35deg); }
+#hide i::before { content: ""; position: absolute; width: 4px; height: 4px; border: 1px solid; border-radius: 50%; left: 3px; top: 1px; }
+#reveal { position: absolute; right: max(18px,env(safe-area-inset-right)); bottom: max(14px,env(safe-area-inset-bottom)); min-height: 36px; padding: 0 12px; border: 1px solid #b6c0b566; border-radius: 24px; font-size: 12px; background: #112d36cc; color: #e7ddc8; opacity: 0; }
+#reveal:hover, #reveal:focus-visible, #scene.show-handle #reveal { opacity: 1; }
+#scene.clean .chrome, #scene.clean .shade { opacity: 0; }
+#scene.clean .instruments { pointer-events: none; }
+#renderer-note, .noscript { position: absolute; top: 18px; left: 4.4vw; margin: 0; padding: 8px 12px; border-radius: 3px; color: var(--ivory); font-size: 12px; background: rgba(12,32,41,.86); }
+@media (max-width: 660px) {
+  .chrome { inset: auto 20px max(24px,env(safe-area-inset-bottom)) 20px; flex-wrap: wrap; gap: 16px; }
+  .signature { gap: 12px; width: 100%; }
+  h1 { font-size: 36px; }
+  .instruments { width: 100%; justify-content: space-between; gap: 6px; }
+  .weather button { height: 36px; padding: 0 11px; gap: 6px; }
+  .icon-button { height: 36px; width: 34px; }
+}
+@media (max-width: 360px) { .chrome { left: 12px; right: 12px; } .weather button { padding: 0 9px; } }
+@media (max-height: 480px) and (orientation: landscape) {
+  .chrome { inset: auto 20px max(13px,env(safe-area-inset-bottom)) 20px; flex-wrap: nowrap; }
+  .signature, .instruments { width: auto; } h1 { font-size: 32px; }
+}
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { transition-duration: 0s !important; } }

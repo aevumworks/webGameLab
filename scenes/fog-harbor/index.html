@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#102d38">
+  <meta name="description" content="雾港，一座用程序建模的三维灯塔岛。">
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="./scene.css">
+  <title>雾港 · Fog Harbor</title>
+  <script defer src="../../vendor/three-r160/three.min.js"></script>
+  <script defer src="./modeling.js"></script>
+  <script defer src="./terrain.js"></script>
+  <script defer src="./buildings.js"></script>
+  <script defer src="./ocean-sky.js"></script>
+  <script defer src="./stage.js"></script>
+  <script defer src="./viewer.js"></script>
+</head>
+<body>
+  <main id="scene" aria-label="雾港海岸场景">
+    <canvas id="harbor" tabindex="0" aria-label="三维灯塔岛。拖动或用方向键环绕，滚轮、双指或加减键调节远近，空格暂停环境动画。"></canvas>
+    <div class="shade" aria-hidden="true"></div>
+    <footer class="chrome">
+      <div class="signature">
+        <h1>雾港</h1><span lang="en">Fog Harbor</span><small>拖动环绕</small>
+      </div>
+      <div class="instruments">
+        <div class="weather" role="group" aria-label="天候">
+          <button type="button" data-weather="dusk" aria-pressed="true"><i class="sky-icon dusk" aria-hidden="true"></i>暮色</button>
+          <button type="button" data-weather="moon" aria-pressed="false"><i class="sky-icon moon" aria-hidden="true"></i>月夜</button>
+          <button type="button" data-weather="rain" aria-pressed="false"><i class="sky-icon rain" aria-hidden="true"></i>风雨</button>
+        </div>
+        <div class="view-tools">
+          <button id="pause" type="button" class="icon-button" aria-label="暂停时间" title="暂停时间（空格）"><i aria-hidden="true"></i></button>
+          <button id="fullscreen" type="button" class="icon-button" aria-label="进入全屏" title="全屏（F）"><i aria-hidden="true"></i></button>
+          <button id="hide" type="button" class="icon-button" aria-label="隐藏界面" title="隐藏界面（H）"><i aria-hidden="true"></i></button>
+        </div>
+      </div>
+    </footer>
+    <button id="reveal" type="button" aria-label="显示界面" title="显示界面（H）" hidden>显示界面</button>
+    <p id="renderer-note" role="status" hidden></p>
+    <noscript><p class="noscript">启用 JavaScript 可观看动态海岸。</p></noscript>
+  </main>
+</body>
+</html>
