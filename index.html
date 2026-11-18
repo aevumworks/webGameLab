@@ -4,18 +4,20 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#292724">
-<meta name="description" content="参观可操作的实时三维建筑场景，从科隆大教堂的西门走进中殿，或环绕灯塔岛观察雾港。">
+<meta name="description" content="第一人称参观吉萨金字塔与阿努比斯展庭、科隆大教堂，以及 webGameLab 的其他实时三维场景。">
 <link rel="icon" href="data:,">
 <title>webGameLab · 场景目录</title>
 <style>
 *{box-sizing:border-box}html{color-scheme:dark}body{margin:0;background:#211f1d;color:#f1eadf;font:15px/1.6 "Segoe UI","Microsoft YaHei",sans-serif}main,header,footer{width:min(1220px,calc(100% - 2*clamp(18px,5vw,80px)));margin:auto}header,footer{display:flex;justify-content:space-between;align-items:center;gap:16px}header{padding:24px 0;border-bottom:1px solid #574d41}.brand{font:22px/1 Georgia,serif;letter-spacing:-.035em}header nav,footer nav{display:flex;gap:clamp(12px,2.4vw,32px);align-items:center}a{color:inherit;text-decoration:none}nav a{color:#d2c1ab;font-size:13px}a:hover,a:focus-visible{color:#fff4d6}a:focus-visible{outline:2px solid #ecc78e;outline-offset:4px}h1{font:500 clamp(23px,3.3vw,39px)/1.2 SimSun,serif;margin:clamp(20px,3vw,42px) 0 18px}.hero{min-height:410px;height:min(65vh,600px);isolation:isolate;position:relative;display:flex;align-items:end;padding:clamp(22px,5vw,72px);overflow:hidden;background:#3e322d}.hero:after{content:"";z-index:-1;position:absolute;inset:0;background:linear-gradient(0deg,#130f0edd,transparent 67%),linear-gradient(90deg,#15131365,transparent 68%)}.hero img{position:absolute;z-index:-2;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 49%;transition:transform .6s}.hero:hover img{transform:scale(1.015)}.eyebrow{color:#e5c69b;font-weight:600;font-size:10px;letter-spacing:.19em}.hero h2{font:500 clamp(36px,6vw,78px)/1.16 SimSun,serif;letter-spacing:.06em;margin:10px 0 2px}.hero em,.secondary em{font:italic clamp(16px,2vw,26px)/1.3 Georgia,serif;color:#e3cba3}.enter{display:block;margin-top:18px;color:#fff1d5;font-size:14px}.secondary{display:grid;grid-template-columns:minmax(185px,37%) 1fr;gap:clamp(19px,3.4vw,53px);align-items:center;border-bottom:1px solid #574d41;padding:clamp(22px,4vw,45px) 0}.secondary img{width:100%;aspect-ratio:16/8;object-fit:cover}.secondary h2{font:500 clamp(24px,4vw,49px)/1.25 SimSun,serif;letter-spacing:.08em;margin:6px 0 1px}.secondary .enter{margin-top:8px}footer{padding:23px 0 32px;color:#bfb3a1;font-size:12px}
 @media(max-width:600px){header{padding:20px 0}.brand{font-size:20px}.hero{min-height:360px;height:57svh;padding:23px}.secondary{grid-template-columns:42% 1fr;gap:16px}.secondary img{aspect-ratio:1.38}.secondary h2{font-size:27px}.secondary .enter{font-size:12px}footer{flex-wrap:wrap}.secondary em{font-size:15px}}@media(prefers-reduced-motion:reduce){.hero img{transition:none}}
+.hero iframe{position:absolute;inset:0;z-index:-2;border:0;width:100%;height:100%;pointer-events:none}
 </style>
 </head>
 <body>
 <header><a href="./" class="brand">webGameLab</a><nav aria-label="主导航"><a href="./architecture/">建筑模型</a><a href="https://github.com/aevumworks/webGameLab">GitHub ↗</a></nav></header>
 <main><h1>场景目录</h1>
-<a class="hero" href="./scenes/003-cologne-cathedral/"><img src="./scenes/003-cologne-cathedral/cover.jpg" alt="束柱与尖拱围合的科隆大教堂中殿，东端透入金色日光"><div><span class="eyebrow">WGL–003 · KÖLN</span><h2>科隆大教堂</h2><em lang="de">Kölner Dom</em><span class="enter">进入第一人称游览　→</span></div></a>
+<a class="hero" href="./scenes/005-giza-anubis/"><iframe loading="lazy" tabindex="-1" aria-hidden="true" title="阿努比斯与吉萨金字塔的实时取景" src="./scenes/005-giza-anubis/?still"></iframe><div><span class="eyebrow">开源建筑 002 · GIZA</span><h2>金字塔与阿努比斯</h2><span class="enter">进入第一人称游览　→</span></div></a>
+<a class="secondary" href="./scenes/003-cologne-cathedral/"><img loading="lazy" src="./scenes/003-cologne-cathedral/cover.jpg" alt="科隆大教堂中殿"><div><span class="eyebrow">开源建筑 001 · KÖLN</span><h2>科隆大教堂</h2><em lang="de">Kölner Dom</em><span class="enter">进入第一人称游览　→</span></div></a>
 <a class="secondary" href="./scenes/fog-harbor/"><img loading="lazy" src="./docs/fog-harbor.jpg" alt="海崖上的灯塔岛与雾中栈桥"><div><span class="eyebrow">WGL–001</span><h2>雾港</h2><em lang="en">Fog Harbor</em><span class="enter">环绕灯塔岛　→</span></div></a>
 </main>
 <footer><span>webGameLab</span><nav aria-label="资料"><a href="https://github.com/aevumworks/webGameLab/tree/main/knowledge">建筑知识库 ↗</a><a href="https://github.com/aevumworks/webGameLab/issues">体验反馈 ↗</a></nav></footer>

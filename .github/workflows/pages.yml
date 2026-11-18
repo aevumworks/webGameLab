@@ -1,0 +1,61 @@
+name: Publish webGameLab
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: webgamelab-pages
+  cancel-in-progress: false
+
+jobs:
+  site:
+    runs-on: ubuntu-24.04
+    environment:
+      name: github-pages
+      url: ${{ steps.publish.outputs.page_url }}
+    env:
+      SCENE: scenes/005-giza-anubis
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Restore repaired models
+        uses: actions/cache@v4
+        with:
+          path: ${{ runner.temp }}/giza-models
+          key: giza-r1-${{ hashFiles('scenes/005-giza-anubis/build/repair_model.py', 'scenes/005-giza-anubis/build/web_model.py') }}
+      - name: Prepare exhibition assets
+        id: models
+        env:
+          WGL005_STANDING_SOURCE: ${{ secrets.WGL005_STANDING_SOURCE }}
+          WGL005_RECUMBENT_SOURCE: ${{ secrets.WGL005_RECUMBENT_SOURCE }}
+        run: python3 "$SCENE/build/fetch_models.py" "$RUNNER_TEMP/giza-models" --raw "$RUNNER_TEMP/giza-source"
+      - name: Repair bootstrap models
+        if: steps.models.outputs.rebuild != ''
+        env:
+          MODELS: ${{ steps.models.outputs.rebuild }}
+        run: |
+          sudo apt-get -qq update
+          sudo apt-get -qq install -y blender python3-pil
+          for kind in $MODELS; do
+            blender -b -t 2 --python-exit-code 1 --python "$SCENE/build/repair_model.py" -- "$kind" "$RUNNER_TEMP/giza-source/$kind.glb" "$RUNNER_TEMP/$kind.glb"
+            /usr/bin/python3 "$SCENE/build/web_model.py" "$kind" "$RUNNER_TEMP/$kind.glb" "$RUNNER_TEMP/giza-models/$kind-r1.glb"
+          done
+      - name: Assemble static site
+        run: |
+          mkdir -p "$RUNNER_TEMP/site"
+          git archive HEAD | tar -x -C "$RUNNER_TEMP/site"
+          mkdir -p "$RUNNER_TEMP/site/$SCENE/models"
+          cp "$RUNNER_TEMP/giza-models/"*-r1.glb "$RUNNER_TEMP/site/$SCENE/models/"
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: ${{ runner.temp }}/site
+      - name: Deploy
+        id: publish
+        uses: actions/deploy-pages@v4
