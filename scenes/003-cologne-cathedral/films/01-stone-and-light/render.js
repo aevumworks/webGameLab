@@ -27,13 +27,43 @@ export const player = createCathedralStage(document.querySelector("canvas")).the
   draw(0);
   document.body.dataset.ready = "true";
   if (!new URLSearchParams(location.search).has("capture")) {
-    const start = performance.now();
+    const duration = 1000 * frameCount / fps;
+    let elapsed = 0, previousTime = null, previousFrame = 0, animation, paused = false;
+    function paint(force = false) {
+      const frame = Math.floor(elapsed * fps / 1000);
+      if (force || frame !== previousFrame) draw(frame);
+      previousFrame = frame;
+    }
     const play = now => {
-      if (!document.hidden) draw(Math.floor((now - start) * fps / 1000) % frameCount);
-      requestAnimationFrame(play);
+      if (previousTime !== null) elapsed = (elapsed + now - previousTime) % duration;
+      previousTime = now;
+      paint();
+      animation = requestAnimationFrame(play);
     };
-    window.addEventListener("resize", viewport);
-    requestAnimationFrame(play);
+    function sync() {
+      cancelAnimationFrame(animation);
+      previousTime = null;
+      if (!paused && !document.hidden) animation = requestAnimationFrame(play);
+    }
+    function toggle() {
+      paused = !paused;
+      sync();
+    }
+    renderer.domElement.addEventListener("click", toggle);
+    window.addEventListener("keydown", event => {
+      if (event.code === "Space") {
+        event.preventDefault();
+        if (!event.repeat) toggle();
+      }
+      if (event.code === "ArrowLeft" || event.code === "ArrowRight") {
+        event.preventDefault();
+        elapsed = Math.min(duration - 1000 / fps, Math.max(0, elapsed + (event.code === "ArrowLeft" ? -5000 : 5000)));
+        paint();
+      }
+    });
+    window.addEventListener("resize", () => { viewport(); paint(true); });
+    document.addEventListener("visibilitychange", sync);
+    sync();
   }
   return {resize, draw, renderer};
 });

@@ -2,9 +2,21 @@
 
 [进入中殿](https://aevumworks.github.io/webGameLab/scenes/003-cologne-cathedral/) · [西门广场](https://aevumworks.github.io/webGameLab/scenes/003-cologne-cathedral/#west) · [Domforum 街景](https://aevumworks.github.io/webGameLab/scenes/003-cologne-cathedral/#square) · [中央车站](https://aevumworks.github.io/webGameLab/scenes/003-cologne-cathedral/#station) · [路德维希博物馆](https://aevumworks.github.io/webGameLab/scenes/003-cologne-cathedral/#museum)
 
-[观看实机宣传片 01《石与光》](https://aevumworks.github.io/webGameLab/scenes/003-cologne-cathedral/films/01-stone-and-light/) · [影片与摄影源码](films/01-stone-and-light/)
+[实时重放《石与光》](https://aevumworks.github.io/webGameLab/scenes/003-cologne-cathedral/films/01-stone-and-light/) · [摄影与录制源码](films/01-stone-and-light/)
 
 ![从木质长椅之间朝唱诗席眺望，浏览器实时渲染](cover.jpg)
+
+## 实机宣传片 01《石与光》
+
+十个镜头从西门广场穿入中殿，近看彩窗、石肋和三王圣龛，最后从镂空双塔拉开，俯看暮光下的科隆街区。在线重放在浏览器中实时绘制同一条 45 秒路线。轻点画面或按空格暂停，左右方向键前后跳过 5 秒。
+
+[摄影目录](films/01-stone-and-light/)收录镜头参数、WebGL 播放和本地录制代码。游览与摄影共用[同一套场景和灯光](stage.js)。克隆仓库后，在摄影目录运行以下命令，将输出路径换成本机发布目录中的文件名，随后用支持 WebGL 的浏览器打开终端显示的地址。
+
+```sh
+python record.py --output /path/to/film.mp4
+```
+
+录制需要 Python 3.9 或更高版本及带 libx264 的 FFmpeg，可通过 `--ffmpeg` 指定 FFmpeg 路径。默认逐帧读取 2560 × 1440 的 WebGL 帧缓冲，以每秒 30 帧编码 1,350 帧无声画面。发布用成片与封面单独保存在本地。影片影像采用 [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/)，Domforum 立面使用 Raimond Spekking 的摄影，经裁切与透视校正。[摄影原件](https://commons.wikimedia.org/wiki/File:Domforum,_K%C3%B6ln-2263.jpg) · [其他材质与数据来源](references/)
 
 ## 游览
 

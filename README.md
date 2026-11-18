@@ -8,7 +8,7 @@
 
 从西门广场仰望双塔，穿过中央门廊，沿木质长椅之间的通道向东行走。交叉部向南看是方格彩窗，继续穿过侧廊，可绕到三王圣龛和东端的七座礼拜堂。
 
-[第一人称参观](https://aevumworks.github.io/webGameLab/scenes/003-cologne-cathedral/) · [实机宣传片 01《石与光》](scenes/003-cologne-cathedral/films/01-stone-and-light/) · [本期文件与操作](scenes/003-cologne-cathedral/) · [米制参数与史料](knowledge/建筑/cologne.md) · [历史图纸与实景摄影](scenes/003-cologne-cathedral/references/)
+[第一人称参观](https://aevumworks.github.io/webGameLab/scenes/003-cologne-cathedral/) · [实时重放《石与光》](https://aevumworks.github.io/webGameLab/scenes/003-cologne-cathedral/films/01-stone-and-light/) · [摄影源码](scenes/003-cologne-cathedral/films/01-stone-and-light/) · [本期文件与操作](scenes/003-cologne-cathedral/) · [米制参数与史料](knowledge/建筑/cologne.md) · [历史图纸与实景摄影](scenes/003-cologne-cathedral/references/)
 
 走出西门可以参观 [Domforum 广场](https://aevumworks.github.io/webGameLab/scenes/003-cologne-cathedral/#square)、[中央车站](https://aevumworks.github.io/webGameLab/scenes/003-cologne-cathedral/#station)和[路德维希博物馆](https://aevumworks.github.io/webGameLab/scenes/003-cologne-cathedral/#museum)。街区由 270 栋建筑的测绘数据重建。
 

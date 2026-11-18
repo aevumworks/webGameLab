@@ -165,7 +165,7 @@ def main():
     with ThreadingHTTPServer(("127.0.0.1", options.port), handler) as server:
         server.recording = recording
         path = EDITION.relative_to(ROOT).as_posix()
-        print(f"Open http://127.0.0.1:{server.server_port}/{path}/render.html?capture&record={recording.key}", flush=True)
+        print(f"Open http://127.0.0.1:{server.server_port}/{path}/index.html?capture&record={recording.key}", flush=True)
         try:
             server.serve_forever()
         except KeyboardInterrupt:
