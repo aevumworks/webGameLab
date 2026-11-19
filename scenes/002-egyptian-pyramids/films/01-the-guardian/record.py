@@ -8,7 +8,7 @@ import runpy
 
 EDITION = Path(__file__).resolve().parent
 ROOT = EDITION.parents[3]
-SHARED = ROOT / "scenes/003-cologne-cathedral/films/01-stone-and-light/record.py"
+SHARED = ROOT / "scenes/001-cologne-cathedral/films/01-stone-and-light/record.py"
 protocol = runpy.run_path(str(SHARED))
 Recording, BaseHandler = protocol["Recording"], protocol["CaptureHandler"]
 SCENE = EDITION.parents[1]

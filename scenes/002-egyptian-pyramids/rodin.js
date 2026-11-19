@@ -1,7 +1,7 @@
 import {GLTFLoader} from "../../vendor/three-r160/GLTFLoader.js";
 
 const loader=new GLTFLoader();
-const published="https://aevumworks.github.io/webGameLab/scenes/005-giza-anubis/";
+const published="https://aevumworks.github.io/webGameLab/scenes/002-egyptian-pyramids/";
 
 // A source checkout can use the public exhibition's model assets or its own locally repaired files.
 async function loadSculpture(kind){

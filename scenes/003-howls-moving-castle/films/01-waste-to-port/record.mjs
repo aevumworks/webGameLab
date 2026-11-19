@@ -1,5 +1,5 @@
 // Run with Ego Lite nodejs. Start the local webGameLab preview on port 4182 first.
-const uri="http://127.0.0.1:4182/scenes/006-howls-moving-castle/";
+const uri="http://127.0.0.1:4182/scenes/003-howls-moving-castle/";
 async function setup(p){
   await p.cdp("Emulation.setDeviceMetricsOverride",{width:1360,height:800,deviceScaleFactor:1,mobile:false});
 }

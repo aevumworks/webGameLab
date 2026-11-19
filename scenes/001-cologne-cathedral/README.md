@@ -1,8 +1,8 @@
-# WGL-003 · 科隆大教堂与主教座堂广场
+# 第一期 · 科隆大教堂
 
-[进入中殿](https://aevumworks.github.io/webGameLab/scenes/003-cologne-cathedral/) · [西门广场](https://aevumworks.github.io/webGameLab/scenes/003-cologne-cathedral/#west) · [Domforum 街景](https://aevumworks.github.io/webGameLab/scenes/003-cologne-cathedral/#square) · [中央车站](https://aevumworks.github.io/webGameLab/scenes/003-cologne-cathedral/#station) · [路德维希博物馆](https://aevumworks.github.io/webGameLab/scenes/003-cologne-cathedral/#museum)
+[进入中殿](https://aevumworks.github.io/webGameLab/scenes/001-cologne-cathedral/) · [西门广场](https://aevumworks.github.io/webGameLab/scenes/001-cologne-cathedral/#west) · [Domforum 街景](https://aevumworks.github.io/webGameLab/scenes/001-cologne-cathedral/#square) · [中央车站](https://aevumworks.github.io/webGameLab/scenes/001-cologne-cathedral/#station) · [路德维希博物馆](https://aevumworks.github.io/webGameLab/scenes/001-cologne-cathedral/#museum)
 
-[实时重放《石与光》](https://aevumworks.github.io/webGameLab/scenes/003-cologne-cathedral/films/01-stone-and-light/) · [摄影与录制源码](films/01-stone-and-light/)
+[实时重放《石与光》](https://aevumworks.github.io/webGameLab/scenes/001-cologne-cathedral/films/01-stone-and-light/) · [摄影与录制源码](films/01-stone-and-light/)
 
 ![从木质长椅之间朝唱诗席眺望，浏览器实时渲染](cover.jpg)
 
@@ -51,4 +51,4 @@ python record.py --output /path/to/film.mp4
 
 ![路德维希博物馆北面的锌板屋顶](ludwig.jpg)
 
-在仓库根目录执行 `node tools/preview.mjs 4182` 后可打开[本机体验](http://127.0.0.1:4182/scenes/003-cologne-cathedral/)。[验收记录](../../knowledge/制作/WGL-003%20科隆大教堂验收.md) · [分期索引](../../knowledge/制作/分期索引.md)
+在仓库根目录执行 `node tools/preview.mjs 4182` 后可打开[本机体验](http://127.0.0.1:4182/scenes/001-cologne-cathedral/)。[验收记录](../../knowledge/制作/WGL-003%20科隆大教堂验收.md) · [分期索引](../../knowledge/制作/分期索引.md)

@@ -17,7 +17,8 @@ async function show(){
   center.copy(sphere.center);radius=sphere.radius/Math.sin(T.MathUtils.degToRad(19.5))*Math.max(1,1/camera.aspect)*1.09;
   const ref=new URL(location.href);ref.searchParams.set("model",id);history.replaceState(null,"",ref);
   const a=q("#card");a.href=id==="giza"
-    ? "https://github.com/aevumworks/webGameLab/blob/main/scenes/005-giza-anubis/parameters.js"
+    ? "https://github.com/aevumworks/webGameLab/blob/main/scenes/002-egyptian-pyramids/parameters.js"
+    : id==="howl" ? "https://github.com/aevumworks/webGameLab/blob/main/scenes/003-howls-moving-castle/parameters.js"
     : "https://github.com/aevumworks/webGameLab/blob/main/knowledge/"+encodeURIComponent("建筑")+"/"+id+".md";
   q("#status").textContent=card.name+" · 米制参数模型";document.body.dataset.model=id;reset();
 }

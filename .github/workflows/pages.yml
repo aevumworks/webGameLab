@@ -20,7 +20,7 @@ jobs:
       name: github-pages
       url: ${{ steps.publish.outputs.page_url }}
     env:
-      SCENE: scenes/005-giza-anubis
+      SCENE: scenes/002-egyptian-pyramids
     steps:
       - uses: actions/checkout@v4
         with:
@@ -29,7 +29,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ${{ runner.temp }}/giza-models
-          key: giza-r1-${{ hashFiles('scenes/005-giza-anubis/build/repair_model.py', 'scenes/005-giza-anubis/build/web_model.py') }}
+          key: giza-r1-${{ hashFiles('scenes/002-egyptian-pyramids/build/repair_model.py', 'scenes/002-egyptian-pyramids/build/web_model.py') }}
       - name: Prepare exhibition assets
         id: models
         env:
@@ -59,6 +59,10 @@ jobs:
           git archive HEAD | tar -x -C "$RUNNER_TEMP/site"
           mkdir -p "$RUNNER_TEMP/site/$SCENE/models"
           cp "$RUNNER_TEMP/giza-models/"*-r1.glb "$RUNNER_TEMP/site/$SCENE/models/"
+          cd "$RUNNER_TEMP/site/scenes"
+          cp -a 001-cologne-cathedral 003-cologne-cathedral
+          cp -a 002-egyptian-pyramids 005-giza-anubis
+          cp -a 003-howls-moving-castle 006-howls-moving-castle
       - uses: actions/upload-pages-artifact@v3
         with:
           path: ${{ runner.temp }}/site

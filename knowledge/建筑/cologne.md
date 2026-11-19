@@ -20,9 +20,9 @@
 
 [平面图](https://commons.wikimedia.org/wiki/File:Plan.cathedrale.Cologne.png)用来确定五廊、交叉部、柱距和七座放射小礼拜堂。扫描图西端约 y=920、东端约 y=36，按 144.58 米换算，比例约为 0.164 米/像素。柱网取柱心，扫描和读图偏差约 0.3–0.7 米。以西面中央入口为原点，向东为负 Z，向南为正 X，Y 表示高程。
 
-[西立面 F 图](https://commons.wikimedia.org/wiki/File:Fassadenplan_F_vom_K%C3%B6lner_Dom.jpg)用于比对三道门廊、中段花窗、钟楼层与镂空八角尖塔。[1859 年唱诗席横剖面](https://commons.wikimedia.org/wiki/File:Jahrbuch_MZK_Band_03_-_Gew%C3%B6lbesystem_-_Fig_75_Chordurchschnitt_des_Domes_zu_C%C3%B6ln_-_S%C3%BCdseite.jpg)用于分辨两层飞扶壁、束柱、侧廊拱券与高侧窗。三份缩览图和原始来源存于[本期素材目录](https://github.com/aevumworks/webGameLab/tree/main/scenes/003-cologne-cathedral/references)。
+[西立面 F 图](https://commons.wikimedia.org/wiki/File:Fassadenplan_F_vom_K%C3%B6lner_Dom.jpg)用于比对三道门廊、中段花窗、钟楼层与镂空八角尖塔。[1859 年唱诗席横剖面](https://commons.wikimedia.org/wiki/File:Jahrbuch_MZK_Band_03_-_Gew%C3%B6lbesystem_-_Fig_75_Chordurchschnitt_des_Domes_zu_C%C3%B6ln_-_S%C3%BCdseite.jpg)用于分辨两层飞扶壁、束柱、侧廊拱券与高侧窗。三份缩览图和原始来源存于[本期素材目录](https://github.com/aevumworks/webGameLab/tree/main/scenes/001-cologne-cathedral/references)。
 
-两张实景摄影用于核对西立面和中殿。西立面照片由 Yair-haklai 拍摄，中殿轴线照片由 Allie_Caulfield 拍摄。原图、许可和加工说明随项目保存。[素材清单和缩览](https://github.com/aevumworks/webGameLab/tree/main/scenes/003-cologne-cathedral/references)
+两张实景摄影用于核对西立面和中殿。西立面照片由 Yair-haklai 拍摄，中殿轴线照片由 Allie_Caulfield 拍摄。原图、许可和加工说明随项目保存。[素材清单和缩览](https://github.com/aevumworks/webGameLab/tree/main/scenes/001-cologne-cathedral/references)
 
 ## 渲染参考
 
@@ -99,7 +99,7 @@
 
 ## 街区配准与陈设
 
-从 Geobasis NRW 的 CityGML 瓦片 32/356/5645 提取大教堂两座塔尖平面位置。塔心间距约 31.91 米，模型中轴距各塔 15.955 米。西门局部坐标原点采用 ETRS89 / UTM 32N 的 E 356477.59、N 5645284.27，DGM1 西门地坪约 55.10 米。室内沿用官方建筑尺寸。城市底模纳入 270 栋建筑的 7,898 个实测数据表面，4 米间距采样原始 1 米地形。周边建筑墙面与屋顶来自 LoD2，屋顶位置对应正射航片，立面精度逐项记录。[德国官方建筑数据](https://data.gov.de/suche/daten/3d-gebaudemodell-nw-lod28b9df) · [数据和许可](https://github.com/aevumworks/webGameLab/tree/main/scenes/003-cologne-cathedral/references)
+从 Geobasis NRW 的 CityGML 瓦片 32/356/5645 提取大教堂两座塔尖平面位置。塔心间距约 31.91 米，模型中轴距各塔 15.955 米。西门局部坐标原点采用 ETRS89 / UTM 32N 的 E 356477.59、N 5645284.27，DGM1 西门地坪约 55.10 米。室内沿用官方建筑尺寸。城市底模纳入 270 栋建筑的 7,898 个实测数据表面，4 米间距采样原始 1 米地形。周边建筑墙面与屋顶来自 LoD2，屋顶位置对应正射航片，立面精度逐项记录。[德国官方建筑数据](https://data.gov.de/suche/daten/3d-gebaudemodell-nw-lod28b9df) · [数据和许可](https://github.com/aevumworks/webGameLab/tree/main/scenes/001-cologne-cathedral/references)
 
 Domforum 沿街楼层参考现场摄影，窗格纹理由去除行人与文字的照片裁片透视校正而成。博物馆、车站与街屋保留测绘体量，其他窗洞、檐饰、树木和街具按实景参照放样。色彩、门窗逐扇形状与街具位置存在复原取值。建筑正门广场、北侧车站和东侧博物馆均有独立参观点。
 
