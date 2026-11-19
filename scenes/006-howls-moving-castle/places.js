@@ -1,29 +1,27 @@
-import {T,TAU,Kit,Surface,lathe,random,pick,tint,group,clamp,mix,shaderNoise} from "./atelier.js";
+import {celMaterial} from "./cel.js";
+import {T,TAU,Kit,Surface,lathe,random,pick,tint,group,clamp,mix} from "./atelier.js";
 import {house,roof,windowFrame,rail,awning,arch,streetLamp} from "./buildings.js";
 import {tree} from "./landscape.js";
 import {turnip,person,heen,hatBrim} from "./figures.js";
 
 const plaster=[0xe3ce9f,0xd8ac85,0xdfbd94,0xc5bca2,0xd1b297,0xd5bb7f];
-const tiles=[0xa5654e,0x965849,0x946955,0x826956,0xa77358];
+const tiles=[0xb77e65,0xa76e58,0x917a70,0x656f80,0xb5846e];
 const brass=0xb2965f,wood=0x765b43;
 const arrivals={
   market:[-15,6.8,.83],harbor:[3.48,-5.99,1.95],palace:[0,35,0],meadow:[-18,13,.62],
   front:[0,17,-.10],memory:[-6,9,.32]
 };
 const doorLocal={market:[-5,-4.3],harbor:[2.60,-6.20],palace:[-8,28],meadow:[-6,-4.3],front:[-5,7.1],memory:[-1,-3.9]};
-const roadMaterial=new T.MeshStandardMaterial({color:0xb4a58e,roughness:.93});
-roadMaterial.onBeforeCompile=s=>{
+const roadMaterial=celMaterial({color:0xb9ad9a},"land",s=>{
   s.vertexShader="varying vec3 vPave;\n"+s.vertexShader;s.vertexShader=s.vertexShader.replace("#include <begin_vertex>","#include <begin_vertex>\n vPave=(modelMatrix*vec4(position,1.)).xyz;");
-  s.fragmentShader="varying vec3 vPave;\n"+shaderNoise+"\n"+s.fragmentShader;
+  s.fragmentShader="varying vec3 vPave;\n"+s.fragmentShader;
   s.fragmentShader=s.fragmentShader.replace("#include <color_fragment>",`#include <color_fragment>
-    vec2 p=vPave.xz*vec2(2.8,4.10);p.y+=.074*paintNoise(vPave.xz*3.);
-    p.x+=mod(floor(p.y),2.)*.5+(hash21(vec2(floor(p.y),1.))-.5)*.45;
-    vec2 uv=fract(p);vec2 edge=min(uv,1.-uv);
-    float grain=paintNoise(vPave.xz*14.),block=hash21(floor(p));
-    float mortar=smoothstep(.008,.105,min(edge.x,edge.y)+.045*grain);
-    diffuseColor.rgb*=mix(.67,.76+.31*block+.13*grain,mortar);
-    diffuseColor.rgb+=vec3(.061,.046,.031)*(1.-smoothstep(.06,.16,uv.y))*mortar; `);
-};
+    vec2 p=vPave.xz*vec2(.90,1.53);
+    p.x+=mod(floor(p.y),2.)*.5;
+    vec2 cell=floor(p),uv=fract(p),edge=min(uv,1.-uv);
+    float mortar=smoothstep(.012,.035+fwidth(p.y),min(edge.x,edge.y));
+    diffuseColor.rgb*=mix(.85,.97+.035*sin(dot(cell,vec2(7.3,16.1))),mortar);`);
+});
 function paving(root,w,d,x=0,z=0){
   const m=new T.Mesh(new T.BoxGeometry(w,.12,d),roadMaterial);m.position.set(x,.028,z);m.receiveShadow=true;root.add(m);
 }

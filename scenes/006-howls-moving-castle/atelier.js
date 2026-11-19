@@ -1,3 +1,4 @@
+import {celMaterial} from "./cel.js";
 export const T = globalThis.THREE;
 export const TAU = Math.PI * 2;
 export const clamp = T.MathUtils.clamp;
@@ -29,74 +30,9 @@ float paintNoise(vec2 p) {
 }`;
 
 const materials = new Map();
-const finishes = {
-  iron:[.66,.29], brass:[.45,.39], wood:[.95,0], paint:[.84,.035],
-  cloth:[.98,0], stone:[.96,0], leaf:[.94,0], glass:[.28,.22], glow:[.7,0]
-};
 export function material(kind) {
-  if (materials.has(kind)) return materials.get(kind);
-  const [roughness,metalness] = finishes[kind];
-  const m = new T.MeshStandardMaterial({roughness,metalness,side:T.DoubleSide});
-  if (kind === "glow") {
-    m.onBeforeCompile = s => {
-      s.fragmentShader=s.fragmentShader.replace("#include <emissivemap_fragment>",
-        "#include <emissivemap_fragment>\n totalEmissiveRadiance+=diffuseColor.rgb*.76;");
-    };
-  } else if (kind !== "leaf") {
-    m.onBeforeCompile = s => {
-      s.vertexShader = "varying vec3 vPaint;varying vec3 vUnit;varying vec2 vTimber;\n"+s.vertexShader;
-      s.vertexShader = s.vertexShader.replace("#include <begin_vertex>",`#include <begin_vertex>
-        vUnit=position;
-        #ifdef USE_INSTANCING
-          vPaint=(instanceMatrix*vec4(position,1.)).xyz;
-          vec3 dim=vec3(length(instanceMatrix[0].xyz),length(instanceMatrix[1].xyz),length(instanceMatrix[2].xyz));
-          vec3 p=position*dim;
-          vTimber=dim.x>=dim.y&&dim.x>=dim.z?vec2(p.x,p.y+p.z*.78):dim.y>=dim.z?vec2(p.y,p.x+p.z*.78):vec2(p.z,p.y+p.x*.78);
-          vTimber+=instanceMatrix[3].xz*vec2(.16,.43);
-        #else
-          vPaint=position;vTimber=position.xy;
-        #endif`);
-      s.fragmentShader = "varying vec3 vPaint;varying vec3 vUnit;varying vec2 vTimber;\n"+shaderNoise+"\n"+s.fragmentShader;
-      const weather = kind === "brass"
-        ? `float tarnish=smoothstep(.45,.84,paintNoise(p*.91)+.18*paintNoise(p*4.2));
-           float polish=paintNoise(vec2(p.x*13.4,p.y*.92));
-           diffuseColor.rgb=mix(diffuseColor.rgb,vec3(.105,.143,.100),tarnish*.52);
-           diffuseColor.rgb*=.90+.18*polish;`
-        : kind === "iron"
-        ? `float rust=smoothstep(.53,.85,paintNoise(p*.78)+.22*paintNoise(p*4.));
-           diffuseColor.rgb=mix(diffuseColor.rgb,diffuseColor.rgb*vec3(1.33,.68,.55),rust*.65);
-           float run=paintNoise(vec2(p.x*14.,p.y*.73));
-           float nick=paintNoise(p*28.+paintNoise(p*6.)*2.);
-           diffuseColor.rgb*=.81+.26*run+.15*nick;
-           diffuseColor.rgb+=vec3(.045,.035,.020)*smoothstep(.82,.94,nick)*(.32+.65*rust);`
-        : kind === "wood" ? `float knot=paintNoise(vTimber*vec2(.68,2.90));
-           float fibre=paintNoise(vec2(vTimber.x*.87,vTimber.y*67.+3.4*knot));
-           float annual=paintNoise(vec2(vTimber.x*.34,vTimber.y*12.+1.9*knot));
-           float grainVisibility=1.-smoothstep(.012,.09,fwidth(vTimber.y));
-           fibre=mix(.50,fibre,grainVisibility);
-           diffuseColor.rgb*=.73+.29*fibre+.18*annual;
-           diffuseColor.rgb+=vec3(.018,.012,.006)*smoothstep(.71,.90,fibre);`
-        : kind==="glass" ? `float sky=clamp(vUnit.y+.5,0.,1.);
-           diffuseColor.rgb*=.69+.57*sky;
-           diffuseColor.rgb+=vec3(.038,.069,.073)*smoothstep(.39,.62,fract(vUnit.x*.72+vUnit.y*.39));`
-        : kind==="stone" ? `float grit=paintNoise(p*18.);
-           diffuseColor.rgb*=.78+.32*grit+.18*paintNoise(p*.8);`
-        : `diffuseColor.rgb*=.88+.22*paintNoise(p*.68+.6*paintNoise(p*3.));`;
-      s.fragmentShader = s.fragmentShader.replace("#include <color_fragment>",`#include <color_fragment>
-        vec2 p=vec2(vPaint.x+.47*vPaint.z,vPaint.y+.35*vPaint.z);
-        float fleck=paintNoise(p*1.4)*.56+paintNoise(p*6.)*.30+paintNoise(p*24.)*.14;
-        diffuseColor.rgb*=.77+.43*fleck;
-        ${weather}`);
-      if(kind==="brass"||kind==="iron"){
-        s.fragmentShader=s.fragmentShader.replace("#include <roughnessmap_fragment>",
-          "#include <roughnessmap_fragment>\n roughnessFactor=clamp(roughnessFactor+"+
-          (kind==="brass"?"tarnish*.30-(1.-tarnish)*.11":"rust*.23-(1.-rust)*nick*.10")+",.20,.96);");
-      }
-    };
-  }
-  m.customProgramCacheKey = () => "howl-"+kind;
-  materials.set(kind,m);
-  return m;
+  if(!materials.has(kind))materials.set(kind,celMaterial({side:T.DoubleSide},kind));
+  return materials.get(kind);
 }
 
 export class Surface {
@@ -121,17 +57,17 @@ export class Surface {
 }
 
 const shape = {
-  box:new T.BoxGeometry(1,1,1), ball:new T.SphereGeometry(1,20,13),
+  box:new T.BoxGeometry(1,1,1), ball:new T.SphereGeometry(1,12,8),
   pebble:new T.IcosahedronGeometry(1,0), boulder:new T.IcosahedronGeometry(1,1),
-  rod:new T.CylinderGeometry(1,1,1,14), pipe:new T.CylinderGeometry(1,1,1,28),
-  slim:new T.CylinderGeometry(1,1,1,8), cone:new T.ConeGeometry(1,1,18),
+  rod:new T.CylinderGeometry(1,1,1,10), pipe:new T.CylinderGeometry(1,1,1,12),
+  slim:new T.CylinderGeometry(1,1,1,8), cone:new T.ConeGeometry(1,1,10),
   spire:new T.ConeGeometry(1,1,6), point:new T.ConeGeometry(1,1,6),
-  rim:new T.TorusGeometry(1,.09,7,32), hoop:new T.TorusGeometry(1,.032,5,40),
-  disk:new T.CircleGeometry(1,32)
+  rim:new T.TorusGeometry(1,.09,5,18), hoop:new T.TorusGeometry(1,.040,4,20),
+  disk:new T.CircleGeometry(1,16)
 };
 const latheShapes = new Map();
 export function lathe(key,profile,sides=28) {
-  if (!latheShapes.has(key)) latheShapes.set(key,new T.LatheGeometry(profile.map(v=>new T.Vector2(...v)),sides));
+  if (!latheShapes.has(key)) latheShapes.set(key,new T.LatheGeometry(profile.map(v=>new T.Vector2(...v)),Math.min(sides,16)));
   return latheShapes.get(key);
 }
 const origin=[0,0,0],unit=[1,1,1],up=new T.Vector3(0,1,0);
@@ -144,6 +80,36 @@ function matrixFrom(pos,sz,rot) {
   return matrix.compose(position,quaternion,scale);
 }
 
+// Disjoint fixed parts on the same moving frame can share one draw and shadow call.
+function combineParts(entries) {
+  const xyz=[],rgb=[],indices=[],p=new T.Vector3(),c=new T.Color();
+  for(const {geo,matrix,tint} of entries){
+    const pos=geo.attributes.position, colors=geo.attributes.color, start=xyz.length/3;
+    for(let i=0;i<pos.count;i++){
+      p.fromBufferAttribute(pos,i).applyMatrix4(matrix).toArray(xyz,xyz.length);
+      if(colors)c.fromBufferAttribute(colors,i).multiply(tint);else c.copy(tint);
+      c.toArray(rgb,rgb.length);
+    }
+    const index=geo.index,wind=matrix.determinant()<0;
+    for(let i=0;i<(index?index.count:pos.count);i+=3){
+      const a=index?index.getX(i):i,b=index?index.getX(i+1):i+1,d=index?index.getX(i+2):i+2;
+      indices.push(start+a,start+(wind?d:b),start+(wind?b:d));
+    }
+  }
+  const merged=new T.BufferGeometry();
+  merged.setAttribute("position",new T.Float32BufferAttribute(xyz,3));
+  merged.setAttribute("color",new T.Float32BufferAttribute(rgb,3));merged.setIndex(indices);
+  merged.computeVertexNormals();merged.computeBoundingSphere();return merged;
+}
+function vertexMaterial(kind){
+  const key=kind+"-vertices";
+  if(!materials.has(key)){
+    const base=material(kind),copy=base.clone();copy.vertexColors=true;copy.onBeforeCompile=base.onBeforeCompile;
+    copy.customProgramCacheKey=()=>key;materials.set(key,copy);
+  }
+  return materials.get(key);
+}
+
 export class Kit {
   constructor(){this.parts=new Map();this.frame=new T.Matrix4();}
   at(pos,rot,sz,build){
@@ -152,6 +118,7 @@ export class Kit {
   }
   put(form,pos,sz,color,kind="paint",rot=null){
     const geo=typeof form==="string"?shape[form]:form;
+    kind=kind==="glow"?"glow":kind==="brass"||kind==="glass"?"satin":"matte";
     let list=this.parts.get(geo);if(!list)this.parts.set(geo,list=new Map());
     let batch=list.get(kind);if(!batch)list.set(kind,batch={matrices:[],colors:[]});
     batch.matrices.push(this.frame.clone().multiply(matrixFrom(pos,sz,rot)));
@@ -168,23 +135,25 @@ export class Kit {
   }
   curve(points,r,c,k="iron",segments=16){
     const line=new T.CatmullRomCurve3(points.map(p=>new T.Vector3(...p)));
-    this.put(new T.TubeGeometry(line,segments,r,8,false),origin,unit,c,k);
+    this.put(new T.TubeGeometry(line,Math.min(segments,12),r,6,false),origin,unit,c,k);
   }
   surface(s,kind="paint"){this.put(s.geometry(),origin,unit,0xffffff,kind);}
-  finish(parent=new T.Group(),shadows=true){
-    for(const [geo,kinds] of this.parts)for(const [kind,batch] of kinds){
-      let mat=material(kind);
-      if(geo.hasAttribute("color")){
-        const key=kind+"-vertices";
-        if(!materials.has(key)){
-          const copy=mat.clone();copy.vertexColors=true;copy.onBeforeCompile=mat.onBeforeCompile;
-          copy.customProgramCacheKey=()=>key;materials.set(key,copy);
-        }
-        mat=materials.get(key);
+  finish(parent=new T.Group(),shadows=true,landscape=false){
+    const fixed=new Map();
+    for(const [geo,kinds] of this.parts)for(const [finish,batch] of kinds){
+      const kind=landscape?"land":finish;
+      if(batch.matrices.length<=3||batch.matrices.length<30&&batch.matrices.length*geo.attributes.position.count<2100){
+        if(!fixed.has(kind))fixed.set(kind,[]);
+        for(let i=0;i<batch.matrices.length;i++)fixed.get(kind).push({geo,matrix:batch.matrices[i],tint:batch.colors[i]});
+        continue;
       }
+      const mat=geo.hasAttribute("color")?vertexMaterial(kind):material(kind);
       const mesh=new T.InstancedMesh(geo,mat,batch.matrices.length);
       for(let i=0;i<mesh.count;i++){mesh.setMatrixAt(i,batch.matrices[i]);mesh.setColorAt(i,batch.colors[i]);}
       mesh.castShadow=shadows;mesh.receiveShadow=true;mesh.computeBoundingSphere();parent.add(mesh);
+    }
+    for(const [kind,entries] of fixed){
+      const m=new T.Mesh(combineParts(entries),vertexMaterial(kind));m.castShadow=shadows;m.receiveShadow=true;parent.add(m);
     }
     return parent;
   }

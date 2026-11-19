@@ -1,4 +1,5 @@
-import {T,TAU,Kit,Surface,clamp,mix,smooth,random,pick,tint,shaderNoise} from "./atelier.js";
+import {celMaterial} from "./cel.js";
+import {T,TAU,Kit,Surface,clamp,mix,smooth,random,pick} from "./atelier.js";
 import {meadowClump,crownGeometry,firGeometry} from "./botany.js";
 
 function hash(x,z){
@@ -55,39 +56,69 @@ export function geography(design){
 const trailZ=x=>17+Math.sin(x*.015)*15+Math.sin(x*.042)*2.8;
 function boardingClearing(x,z){return Math.hypot((x+9)*.93,(z+22)*.66)<19;}
 function terrain(geo){
-  const g=new T.PlaneGeometry(geo.extent*2,geo.extent*2,316,316);g.rotateX(-Math.PI/2);
+  const g=new T.PlaneGeometry(geo.extent*2,geo.extent*2,320,320);g.rotateX(-Math.PI/2);
   const p=g.attributes.position,colors=new Float32Array(p.count*3),c=new T.Color();
-  const moss=new T.Color(0x738942),grass=new T.Color(0xb4b259),dark=new T.Color(0x6c8850);
+  const moss=new T.Color(0x879c85),grass=new T.Color(0xb6bd95),dark=new T.Color(0x728b86);
   for(let i=0;i<p.count;i++){
     const x=p.getX(i),z=p.getZ(i),h=geo.height(x,z);p.setY(i,h);
     const n=noise(x*.014+7,z*.014+17),f=noise(x*.056,z*.056);
     c.copy(moss).lerp(grass,smooth(.18,.83,n*.75+f*.25)).lerp(dark,smooth(20,44,h)*.46);
     const rocky=noise(x*.024+8,z*.020+6);
-    c.lerp(new T.Color(0x929178),smooth(.71,.94,rocky)*.72);
+    c.lerp(new T.Color(0x9ba58e),smooth(.71,.94,rocky)*.72);
     if(geo.district(x,z)==="front")c.lerp(new T.Color(0x665e54),.84);
-    if(geo.wet(x,z))c.set(0x7b9073);
+    if(geo.wet(x,z))c.set(0x829e90);
     c.multiplyScalar(.93+.13*f).toArray(colors,i*3);
   }
   g.setAttribute("color",new T.BufferAttribute(colors,3));g.computeVertexNormals();
-  const mat=new T.MeshStandardMaterial({vertexColors:true,roughness:1});
-  mat.onBeforeCompile=s=>{
+  const mat=celMaterial({vertexColors:true},"land",s=>{
     s.vertexShader="varying vec3 vLand;\n"+s.vertexShader;
     s.vertexShader=s.vertexShader.replace("#include <begin_vertex>","#include <begin_vertex>\n vLand=position;");
-    s.fragmentShader="varying vec3 vLand;\n"+shaderNoise+"\n"+s.fragmentShader;
+    s.fragmentShader="varying vec3 vLand;\n"+s.fragmentShader;
     s.fragmentShader=s.fragmentShader.replace("#include <color_fragment>",`#include <color_fragment>
       vec2 p=vLand.xz;
-      float stroke=paintNoise(p*vec2(1.6,.67))*.48+paintNoise(p*.32)*.34+paintNoise(p*3.7)*.18;
-      diffuseColor.rgb*=.72+.54*stroke;
-      float t=abs(p.y-(17.+sin(p.x*.015)*15.+sin(p.x*.042)*2.8));
-      float path=(1.-smoothstep(1.2,3.1,t+(stroke-.5)*2.4))*(1.-smoothstep(240.,360.,abs(p.x)));
-      diffuseColor.rgb=mix(diffuseColor.rgb,vec3(.42,.334,.177)*(.77+.46*stroke),path*.89);
+      float d=abs(p.y-(17.+sin(p.x*.015)*15.+sin(p.x*.042)*2.8));
+      float road=(1.-smoothstep(1.67,2.00,d))*(1.-smoothstep(240.,360.,abs(p.x)));
+      diffuseColor.rgb=mix(diffuseColor.rgb,vec3(.48,.41,.245),road*.76);
     `);
-  };
-  const mesh=new T.Mesh(g,mat);mesh.receiveShadow=true;return mesh;
+  });
+  // All tiles reference the same height and colour samples. Coarse tiles use
+  // every border vertex as well, so switching resolution never opens a crack.
+  const group=new T.Group(),tiles=[],tileCells=32,side=321;
+  for(let tz=0;tz<10;tz++)for(let tx=0;tx<10;tx++){
+    const x0=tx*tileCells,z0=tz*tileCells,at=(x,z)=>(z0+z)*side+x0+x;
+    function tileGeometry(step){
+      const idx=[];
+      for(let z=0;z<tileCells;z+=step)for(let x=0;x<tileCells;x+=step){
+        const a=at(x,z),b=at(x,z+step),c=at(x+step,z+step),d=at(x+step,z);
+        if(step===1||x>0&&x+step<tileCells&&z>0&&z+step<tileCells){idx.push(a,b,d,b,c,d);continue;}
+        const ring=[a];
+        if(x===0)for(let j=1;j<step;j++)ring.push(at(x,z+j));ring.push(b);
+        if(z+step===tileCells)for(let j=1;j<step;j++)ring.push(at(x+j,z+step));ring.push(c);
+        if(x+step===tileCells)for(let j=1;j<step;j++)ring.push(at(x+step,z+step-j));ring.push(d);
+        if(z===0)for(let j=1;j<step;j++)ring.push(at(x+step-j,z));
+        const center=at(x+step/2,z+step/2);
+        for(let j=0;j<ring.length;j++)idx.push(center,ring[j],ring[(j+1)%ring.length]);
+      }
+      const tile=new T.BufferGeometry();
+      for(const key of ["position","normal","color"])tile.setAttribute(key,g.attributes[key]);
+      tile.setIndex(idx);return tile;
+    }
+    const fine=tileGeometry(1),coarse=tileGeometry(4),mesh=new T.Mesh(coarse,mat);
+    const w=geo.extent/5,cx=-geo.extent+(tx+.5)*w,cz=-geo.extent+(tz+.5)*w;
+    fine.boundingSphere=new T.Sphere(new T.Vector3(cx,20,cz),Math.hypot(w/Math.SQRT2,45));
+    coarse.boundingSphere=fine.boundingSphere;
+    mesh.receiveShadow=true;group.add(mesh);tiles.push({mesh,cx,cz,fine,coarse});
+  }
+  return {group,update(pos){
+    for(const tile of tiles){
+      const dx=Math.max(0,Math.abs(tile.cx-pos.x)-geo.extent/10),dz=Math.max(0,Math.abs(tile.cz-pos.z)-geo.extent/10);
+      tile.mesh.geometry=dx*dx+dz*dz<200*200?tile.fine:tile.coarse;
+    }
+  }};
 }
 function mountains(){
-  const p=[],indices=[],colors=[],sections=640,rows=48;
-  const base=new T.Color(),snow=new T.Color(0xe1eceb),shade=new T.Color(0x6e8190);
+  const p=[],indices=[],colors=[],sections=168,rows=15;
+  const base=new T.Color(),snow=new T.Color(0xd3dbe1),shade=new T.Color(0x95a9b9);
   const peaks=[[.16,470,.16],[.63,320,.13],[1.1,540,.20],[1.79,380,.16],[2.13,520,.14],[2.62,470,.18],[3.24,650,.19],[3.74,420,.20],[4.16,640,.19],[4.71,440,.18],[5.28,655,.24],[5.64,460,.16],[6.08,400,.17]];
   for(let j=0;j<=rows;j++)for(let i=0;i<=sections;i++){
     const a=i/sections*TAU,t=j/rows,ca=Math.cos(a),sa=Math.sin(a);
@@ -101,43 +132,31 @@ function mountains(){
     const ridgelet=Math.abs(Math.sin(a*34+gully*3.6+t*6.2));
     const h=-12+slope*ridge*.74+(gully-.4)*105*smooth(.01,.35,t)+(vein-.5)*36*slope-ridgelet*40*slope;
     p.push(xx,h,zz);
-    base.set(0x617f77).lerp(shade,smooth(70,275,h)*.95);
-    base.lerp(snow,smooth(257,342,h+(gully-.5)*112+(vein-.5)*100+Math.sin(a*42+t*9)*26));
-    base.multiplyScalar(.87+.24*gully).toArray(colors,colors.length);
+    base.set(0x6f8898).lerp(shade,smooth(70,275,h)*.95);
+    base.lerp(snow,smooth(265,298,h+(gully-.5)*112+(vein-.5)*100+Math.sin(a*42+t*9)*26));
+    base.multiplyScalar(.92+.13*gully).toArray(colors,colors.length);
     if(j<rows && i<sections){const k=j*(sections+1)+i;indices.push(k,k+1,k+sections+1,k+1,k+sections+2,k+sections+1);}
   }
   const g=new T.BufferGeometry();g.setAttribute("position",new T.Float32BufferAttribute(p,3));g.setAttribute("color",new T.Float32BufferAttribute(colors,3));g.setIndex(indices);g.computeVertexNormals();
-  const mat=new T.MeshStandardMaterial({vertexColors:true,side:T.DoubleSide,roughness:1});
-  mat.onBeforeCompile=s=>{
-    s.vertexShader="varying vec3 vPeak;\n"+s.vertexShader;
-    s.vertexShader=s.vertexShader.replace("#include <begin_vertex>","#include <begin_vertex>\n vPeak=position;");
-    s.fragmentShader="varying vec3 vPeak;\n"+shaderNoise+"\n"+s.fragmentShader;
-    s.fragmentShader=s.fragmentShader.replace("#include <color_fragment>",`#include <color_fragment>
-      vec2 v=vec2(vPeak.x*.037+vPeak.z*.021,vPeak.y*.037+vPeak.z*.013);
-      float grain=paintNoise(v)+.32*paintNoise(v*3.);
-      float ravine=abs(sin(v.x*.43+v.y*.76+grain*1.8));
-      float crack=(1.-smoothstep(.08,.64,ravine+grain*.16))*smoothstep(120.,230.,vPeak.y);
-      diffuseColor.rgb=mix(diffuseColor.rgb,vec3(.073,.11,.135),crack*.79);
-      diffuseColor.rgb*=(.76+grain*.32);`);
-  };
+  const mat=celMaterial({vertexColors:true,side:T.DoubleSide},"land");
   return new T.Mesh(g,mat);
 }
 function water(geo){
-  const time={value:0},mat=new T.MeshStandardMaterial({color:0x70adab,roughness:.37,metalness:.05});
-  mat.onBeforeCompile=s=>{
+  const time={value:0},mat=celMaterial({color:0x779aaa},"land",s=>{
     s.uniforms.waterTime=time;s.vertexShader="varying vec3 vWater;\n"+s.vertexShader;
     s.vertexShader=s.vertexShader.replace("#include <begin_vertex>","#include <begin_vertex>\n vWater=(modelMatrix*vec4(position,1.)).xyz;");
-    s.fragmentShader="varying vec3 vWater;uniform float waterTime;\n"+shaderNoise+"\n"+s.fragmentShader;
+    s.fragmentShader="varying vec3 vWater;uniform float waterTime;\n"+s.fragmentShader;
     s.fragmentShader=s.fragmentShader.replace("#include <color_fragment>",`#include <color_fragment>
-      vec2 p=vWater.xz;float w=paintNoise(p*vec2(.16,1.4)+vec2(waterTime*.23,waterTime*.4));
-      float n=paintNoise(p*.075+vec2(waterTime*.045,0.));
-      diffuseColor.rgb*=.67+.66*n;
-      float strand=paintNoise(p*vec2(.43,3.6)+vec2(waterTime*.27,-waterTime*.62));
-      float grazing=pow(1.-clamp(normalize(cameraPosition-vWater).y,0.,1.),4.);
-      diffuseColor.rgb=mix(diffuseColor.rgb,vec3(.31,.51,.62)*(.86+.15*n),grazing*.32);
-      diffuseColor.rgb+=vec3(.114,.155,.15)*smoothstep(.75,.88,w)*smoothstep(.54,.78,strand);
+      vec2 cell=vWater.xz*vec2(.12,.29);cell.x+=waterTime*.11;
+      float row=floor(cell.y);
+      cell.x+=sin(row*42.17)*4.;
+      vec2 uv=fract(cell)-.5;
+      float crest=abs(uv.x)*.9+abs(uv.y)*3.9;
+      float aa=max(.022,fwidth(crest));
+      float glint=(1.-smoothstep(.20-aa,.20+aa,crest))*smoothstep(.24,.81,sin(row*3.9+floor(cell.x)*7.1));
+      diffuseColor.rgb=mix(diffuseColor.rgb,vec3(.50,.68,.63),glint*.61);
     `);
-  };
+  });
   const root=new T.Group(),ocean=new T.Mesh(new T.PlaneGeometry(geo.extent*2,geo.extent*2),mat);
   ocean.rotation.x=-Math.PI/2;ocean.position.y=.89;ocean.receiveShadow=true;root.add(ocean);
   for(const l of geo.lakes){
@@ -147,14 +166,14 @@ function water(geo){
 }
 const meadowForms=[0,1,2,3].map(meadowClump),crown=crownGeometry(),fir=firGeometry();
 function paintedGrass(geo){
-  const root=new T.Group(),tile=28,active=new Map();
-  const canopyMat=new T.MeshLambertMaterial({vertexColors:true,side:T.DoubleSide});
-  const wind={value:0};canopyMat.onBeforeCompile=s=>{
+  const root=new T.Group(),tile=28,active=new Map(),thresholdCells=new Map(),pool=[];
+  const wind={value:0};
+  const canopyMat=celMaterial({vertexColors:true,side:T.DoubleSide},"land",s=>{
     s.uniforms.breeze=wind;s.vertexShader="uniform float breeze;\n"+s.vertexShader;
     s.vertexShader=s.vertexShader.replace("#include <begin_vertex>",`#include <begin_vertex>
       vec3 stem=(instanceMatrix*vec4(0.,0.,0.,1.)).xyz;
       transformed.x+=position.y*position.y*.22*sin(breeze*1.8+stem.x*.31+stem.z*.23);`);
-  };
+  });
   function fill(cell,ix,iz){
     const r=random(Math.floor(hash(ix,iz)*4294967295)),dummy=new T.Object3D();
     const counts=[0,0,0,0];
@@ -163,7 +182,7 @@ function paintedGrass(geo){
       for(const m of cell.children){m.count=0;m.userData.fullCount=0;m.visible=false;}
       return;
     }
-    for(let i=0;i<223;i++){
+    for(let i=0;i<73;i++){
       const x=(ix+r())*tile,z=(iz+r())*tile,id=geo.district(x,z);
       if(geo.wet(x,z)||boardingClearing(x,z)&&r()>.09||Math.abs(z-trailZ(x))<1.4&&Math.abs(x)<280)continue;
       if(["market","harbor","palace","front"].includes(id)&&distance(x,z,geo.places[id])<sizes[id]-3)continue;
@@ -187,28 +206,33 @@ function paintedGrass(geo){
     }
     if(root.userData.cx===cx&&root.userData.cz===cz){density();return;}
     root.userData.cx=cx;root.userData.cz=cz;
-    const pool=[];
-    for(const [key,v] of active)if(Math.abs(v.ix-cx)>2||Math.abs(v.iz-cz)>2){pool.push(v.cell);active.delete(key);}
+    for(const [key,v] of active)if(Math.abs(v.ix-cx)>2||Math.abs(v.iz-cz)>2){
+      v.cell.visible=false;if(!thresholdCells.has(key))pool.push(v.cell);
+      active.delete(key);
+    }
     for(let ix=cx-2;ix<=cx+2;ix++)for(let iz=cz-2;iz<=cz+2;iz++){
       const key=ix+","+iz;if(active.has(key))continue;
+      const prepared=thresholdCells.get(key);
+      if(prepared){prepared.cell.visible=true;active.set(key,prepared);continue;}
       let cell=pool.pop();
-      if(!cell){cell=new T.Group();for(const g of meadowForms)cell.add(new T.InstancedMesh(g,canopyMat,223));root.add(cell);}
+      if(!cell){cell=new T.Group();for(const g of meadowForms)cell.add(new T.InstancedMesh(g,canopyMat,73));root.add(cell);}
+      cell.visible=true;
       fill(cell,ix,iz);active.set(key,{ix,iz,cell});
     }
     density();
   }
-  return {root,update};
+  return {root,update,retainThreshold(){for(const [key,v] of active)thresholdCells.set(key,v);}};
 }
 export function tree(k,x,y,z,h,r,pine=false){
   const trunk=0x72644d;
   k.post(x,y+h*.27,z,h*.043,h*.55,trunk,"wood");
   if(pine){
-    k.put(fir,[x,y,z],[h,h,h],pick(r,[0x537852,0x5a8058,0x5f845b]),"leaf",[0,r()*TAU,0]);
+    k.put(fir,[x,y,z],[h,h,h],pick(r,[0x47746a,0x577e6b,0x5e8673]),"leaf",[0,r()*TAU,0]);
   }else{
-    for(let j=0;j<6;j++){
-      const a=r()*TAU,rad=j===0?0:h*(.10+r()*.12),xx=x+Math.cos(a)*rad,zz=z+Math.sin(a)*rad;
+    for(let j=0;j<3;j++){
+      const a=r()*TAU,rad=j===0?0:h*(.12+r()*.10),xx=x+Math.cos(a)*rad,zz=z+Math.sin(a)*rad;
       k.line([x,y+h*.38,z],[xx,y+h*.68,zz],.09+h*.017,trunk,"wood");
-      const sc=h*(.21+r()*.09);
+      const sc=h*(.26+r()*.08);
       k.put(crown,[xx,y+h*(.64+r()*.17),zz],[sc,sc*(1+r()*.31),sc],pick(r,[0x719957,0x91a95e,0x82a05b,0x71975c]),"leaf",[0,r()*TAU,.15]);
     }
   }
@@ -217,7 +241,7 @@ function vegetation(geo){
   const root=new T.Group(),r=random(99371),groves=[];
   for(let ix=-3;ix<=3;ix++)for(let iz=-3;iz<=3;iz++){
     const k=new Kit(),close=new Kit(),far=new Kit();
-    for(let i=0;i<53;i++){
+    for(let i=0;i<40;i++){
       const x=(ix+r()-.5)*305,z=(iz+r()-.5)*305;
       if(geo.wet(x,z)||geo.district(x,z)!=="waste"||Math.hypot(x,z)<46)continue;
       const forest=noise(x*.009,z*.009);
@@ -236,21 +260,21 @@ function vegetation(geo){
         }
       }
     }
-    k.finish(root,false);
-    const hi=close.finish(new T.Group(),false),lo=far.finish(new T.Group(),false);
+    k.finish(root,false,true);
+    const hi=close.finish(new T.Group(),false,true),lo=far.finish(new T.Group(),false,true);
     if(hi.children.length){root.add(hi,lo);groves.push({x:ix*305,z:iz*305,hi,lo});}
   }
   const rock=new Kit();
-  for(let j=0;j<98;j++){
+  for(let j=0;j<43;j++){
     const a=r()*TAU,d=22+r()*83,x=Math.cos(a)*d,z=Math.sin(a)*d;
     if(boardingClearing(x,z)||Math.abs(z-trailZ(x))<3||Math.hypot(x-21,z-34)<8)continue;
     const sc=.25+r()*1.55;
     rock.put("boulder",[x,geo.height(x,z)-.12,z],[sc*1.3,sc*.56,sc],pick(r,[0x89927a,0xa1a186,0x7c846d]),"stone",[r()*.22,r()*TAU,r()*.24]);
-  }rock.finish(root,false);
+  }rock.finish(root,false,true);
   return {root,update(p){for(const g of groves){const near=Math.hypot(p.x-g.x,p.z-g.z)<330;g.hi.visible=near;g.lo.visible=!near;}}};
 }
 export function buildLandscape(geo){
-  const root=new T.Group(),pond=water(geo),grass=paintedGrass(geo),trees=vegetation(geo);
-  root.add(terrain(geo),mountains(),pond.root,trees.root,grass.root);
-  return {root,update(camera,time){pond.time.value=time;trees.update(camera);grass.update(camera,time);}};
+  const root=new T.Group(),ground=terrain(geo),pond=water(geo),grass=paintedGrass(geo),trees=vegetation(geo);
+  root.add(ground.group,mountains(),pond.root,trees.root,grass.root);
+  return {root,retainThreshold:grass.retainThreshold,update(camera,time){ground.update(camera);pond.time.value=time;trees.update(camera);grass.update(camera,time);}};
 }

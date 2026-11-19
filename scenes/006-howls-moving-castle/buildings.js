@@ -10,7 +10,7 @@ export function windowFrame(k,x,y,z,w,h,shutters=false,glass=0x527576) {
   if(shutters)for(const side of [-1,1]){
     const xx=x+side*w*.76;
     k.box(xx,y,z+.01,w*.4,h*1.05,.10,0x63837c,"wood");
-    for(let i=0;i<6;i++)k.box(xx,y+h*(i/6-.42),z+.08,w*.34,h*.031,.045,0x415e58,"wood");
+    for(let i=0;i<2;i++)k.box(xx,y+h*(i*.43-.21),z+.08,w*.33,h*.051,.045,0x415e58,"wood");
   }
 }
 
@@ -21,16 +21,8 @@ export function roof(k,w,d,h,rise,col,detail=true){
     const x=side*w/2;
     s.tri([x,h,-depth],[x,h,depth],[x,h+rise,0],0xead8af);
     k.box(0,h+rise*.5,side*depth*.5,w+.44,.12,length+.16,col,"paint",[side*angle,0,0]);
-    for(let row=0;row<Math.max(3,Math.round(d*1.3));row++){
-      const f=(row+.24)/Math.max(3,Math.round(d*1.3)),z=side*f*depth,y=h+rise*(1-f)+.067;
-      k.box(0,y,z,w+.39,.039,.055,tint(col,row%2?.69:.82),"paint",[side*angle,0,0]);
-      if(detail){
-        const cols=Math.ceil(w*1.65);
-        for(let j=0;j<cols;j+=2){
-          const xx=(j+(row%2)*.52)/cols*w-w/2;
-          k.box(xx,y+.012,z,.027,.04,length/(d*1.55),tint(col,.69),"paint",[side*angle,0,0]);
-        }
-      }
+    if(detail&&d>3){
+      k.box(0,h+rise*.49+.068,side*depth*.51,w+.38,.045,.08,tint(col,.81),"paint",[side*angle,0,0]);
     }
     k.box(0,h,side*depth,w+.49,.16,.13,0x48382d,"wood");
   }

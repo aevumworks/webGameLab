@@ -1,3 +1,4 @@
+import {celMaterial} from "./cel.js";
 import {T,TAU,Kit,Surface,lathe,random,pick,tint,group,clamp,mix} from "./atelier.js";
 import {arch,windowFrame} from "./buildings.js";
 import {calciferModel} from "./figures.js";
@@ -10,12 +11,12 @@ function legs(k,x,z,w,d,h,col){
   for(const sx of [-1,1])for(const sz of [-1,1])k.post(x+sx*(w*.5-.10),h*.5,z+sz*(d*.5-.10),.061,h,col,"wood");
 }
 function planks(k,x,y,z,w,d,r){
-  const rows=Math.ceil(d/.28),rowD=d/rows;
+  const rows=Math.ceil(d/.42),rowD=d/rows;
   for(let j=0;j<rows;j++){
     const zz=z-d/2+(j+.5)*rowD;let end=-w/2;
     while(end<w/2-.015){
       const extent=Math.min(w/2-end,1.8+r()*2.9),xx=x+end+extent/2;
-      k.box(xx,y,zz,extent-.011,.105,rowD-.009,pick(r,[0x916e4e,0x947757,0x826348,0x9d7957]),"wood");end+=extent;
+      k.box(xx,y,zz,extent-.011,.105,rowD-.009,pick(r,[0xa57b55,0xa47b55,0x9c7552,0xab825b]),"wood");end+=extent;
     }
   }
 }
@@ -27,10 +28,10 @@ function chair(k,x,z,angle=0){
   });
 }
 function counter(k,x,z,w){
-  k.box(x,.50,z,w,.98,.87,0x6b795c,"wood");k.box(x,1.035,z,w+.09,.13,.96,0x927351,"wood");
+  k.box(x,.50,z,w,.98,.87,0x647f88,"wood");k.box(x,1.035,z,w+.09,.13,.96,0x927351,"wood");
   for(let j=0;j<Math.ceil(w/.68);j++){
     const xx=x-w*.5+(j+.5)*w/Math.ceil(w/.68);
-    k.box(xx,.48,z+.46,w/Math.ceil(w/.68)-.06,.75,.045,0x859174,"wood");
+    k.box(xx,.48,z+.46,w/Math.ceil(w/.68)-.06,.75,.045,0x96a6a4,"wood");
     k.ball(xx+.13,.76,z+.51,.04,.04,.03,gold,"brass");
   }
 }
@@ -51,7 +52,7 @@ function fireplace(k){
   }
   arch(k,x,.32,z+.45,2.76,1.83,.46,0x8d7e68);
   const hood=lathe("hearth-hood",[[1,0],[1,.085],[.91,.14],[.65,.46],[.47,.78],[.37,1]],34);
-  k.put(hood,[x,2.03,z-.10],[1.93,1.38,.91],0x46514b,"iron");k.box(x,2.04,z+.21,3.63,.14,.86,0x665646,"iron");
+  k.put(hood,[x,2.03,z-.10],[1.93,1.38,.91],0x3c4a59,"iron");k.box(x,2.04,z+.21,3.63,.14,.86,0x665646,"iron");
   k.post(x,3.38,z-.24,.68,1.11,0x52564e);
   k.line([x-1.34,1.94,z+.74],[x+1.34,1.94,z+.74],.042,0x68563d);
   for(const [dx,l] of [[-.98,.57],[.77,.45],[1.10,.62]]){
@@ -119,10 +120,10 @@ export function hearthRoom(design){
   const k=new Kit(),r=random(416),w=design.kitchenWidthM,d=design.kitchenDepthM,top=6.74;
   planks(k,0,-.056,0,w,d,r);
   planks(k,.97,3.46,0,w-1.94,d,r);planks(k,-4.24,3.46,-3.69,1.98,1.24,r);
-  k.box(-w*.5-.06,top*.5,0,.16,top,d+.24,0xb5aa83);
+  k.box(-w*.5-.06,top*.5,0,.16,top,d+.24,0xd4c4a9);
   for(const [a,b] of [[-d/2-.12,-1.48],[.045,d/2+.12]])k.box(w*.5+.06,top*.5,(a+b)*.5,.16,top,b-a,0xb5aa83);
   k.box(w*.5+.06,(top+2.48)/2,-.72,.16,top-2.48,1.54,0xb5aa83);
-  for(const sz of [-1,1])k.box(0,top*.5,sz*(d*.5+.06),w+.2,top,.18,0xc2b68c);
+  for(const sz of [-1,1])k.box(0,top*.5,sz*(d*.5+.06),w+.2,top,.18,0xd7c59f);
   k.box(0,top,0,w+.3,.23,d+.3,0x887056,"wood");
   for(const y of [.24,3.26,3.74,6.49]){
     for(const sz of [-1,1])k.box(0,y,sz*(d*.5-.025),w,.17,.13,oak,"wood");
@@ -138,6 +139,17 @@ export function hearthRoom(design){
     k.at([.18,0,4.18],[0,Math.PI,0],null,()=>windowFrame(k,0,yy,0,2.05,1.40,false,0xc5cbb1));
   }
   fireplace(k);dining(k,r);counter(k,2.50,-3.71,3.7);
+  // The two boards of the hand bellows hinge about its brass air nozzle.
+  const bellows=group(scene,-2.74,.86,-3.29),boards=new Kit(),leather=new Kit();
+  k.line([-2.74,.86,-3.28],[-2.44,.53,-3.61],.065,gold,"brass");
+  k.box(-2.74,.82,-3.06,.34,.07,.55,oak,"wood");
+  k.line([-2.74,.4,-3.17],[-2.74,.82,-3.09],.075,dark,"iron");
+  for(let i=0;i<3;i++)leather.box(0,.042+i*.045,.25,.33-i*.014,.055,.44,0x875d47,"wood");
+  const folds=leather.finish();bellows.add(folds);
+  const lid=group(bellows),pumpHandle=group(lid,0,0,.54);
+  boards.box(0,0,.24,.35,.065,.48,oak,"wood");
+  boards.line([0,0,.42],[0,0,.54],.032,gold,"brass");
+  boards.line([-.12,0,.54],[.12,0,.54],.040,0xba8956,"wood","rod");boards.finish(lid);
   k.put(bowl,[2.75,1.12,-3.64],[.53,.32,.37],0xa5b3a5,"paint");
   k.curve([[3.29,1.12,-3.89],[3.29,1.51,-3.89],[2.98,1.54,-3.89],[2.96,1.41,-3.89]],.034,gold,"brass");
   for(let j=0;j<2;j++){
@@ -164,18 +176,23 @@ export function hearthRoom(design){
     dk.box(.68,yy,.09,1.09,.84,.052,0x58654e,"wood");dk.box(.68,yy,.127,.94,.69,.045,0x7c8465,"wood");
   }
   for(const yy of [.43,1.97]){dk.box(.09,yy,.13,.28,.073,.07,0x695c46,"iron");dk.post(.025,yy,.141,.043,.20,0xae935e,"brass");}
-  dk.box(1.20,1.05,.145,.14,.32,.043,0xb29662,"brass");dk.ball(1.20,1.08,.217,.084,.084,.080,0xc6a66b,"brass");dk.finish(leaf);
+  dk.box(1.20,1.05,.145,.14,.32,.043,0xb29662,"brass");dk.ball(1.20,1.08,.217,.084,.084,.080,0xc6a66b,"brass");
+  dk.line([1.20,1.08,.22],[1.20,1.08,.32],.035,gold,"brass");
+  dk.line([1.20,1.08,.32],[1.345,1.08,.32],.043,0xc6a66b,"brass","rod");dk.finish(leaf);
+  const latch=group(leaf,1.31,1.08,.32);
   const reveal=new T.Mesh(new T.PlaneGeometry(1.48,2.37),new T.MeshBasicMaterial({color:0xb9cec0,side:T.DoubleSide}));
   reveal.position.set(0,1.24,-.17);door.add(reveal);
   const disk=group(door,-1.11,2.04,.18),dial=new T.Group();disk.add(dial);
   const frame=new Kit();frame.put("rim",[0,0,.007],[.386,.386,.48],gold,"brass");frame.put("cone",[0,.462,.065],[.066,.13,.042],gold,"brass",[0,0,Math.PI]);frame.finish(disk);
   const quadrants=[];
   for(let i=0;i<4;i++){
-    const mat=new T.MeshStandardMaterial({color:0xffffff,roughness:.68,side:T.DoubleSide});
+    const mat=celMaterial({color:0xffffff,side:T.DoubleSide},"satin");
     const wedge=new T.Mesh(new T.CircleGeometry(.356,16,Math.PI/4+Math.PI*i/2,Math.PI/2),mat);
     wedge.position.z=.024;dial.add(wedge);quadrants.push(wedge);
   }
   const pin=new Kit();pin.ball(0,0,.078,.065,.065,.047,gold,"brass");pin.finish(disk);
+  const fingerKnob=group(dial,0,-.277,.100),knob=new Kit();
+  knob.ball(0,0,0,.053,.053,.066,0xd5b273,"brass");knob.finish(fingerKnob);
   k.finish(scene);
   const calc=calciferModel();calc.position.set(-1.99,.445,-3.29);scene.add(calc);
   const fill=new T.HemisphereLight(0xd2d2bd,0x97816b,.98);scene.add(fill);
@@ -184,11 +201,13 @@ export function hearthRoom(design){
   const upLight=new T.PointLight(0xffdfb0,19,12,1.75);upLight.position.set(-.50,5.76,1.15);scene.add(upLight);
   const casement=new T.SpotLight(0xffe3b5,68,12,.68,.33,1.8);
   casement.position.set(-4.84,2.30,.61);casement.target.position.set(.95,.22,-.35);
-  casement.castShadow=true;casement.shadow.mapSize.set(512,512);casement.shadow.bias=-.00065;casement.shadow.normalBias=.026;
+  casement.castShadow=true;casement.shadow.autoUpdate=false;casement.shadow.needsUpdate=true;casement.shadow.mapSize.set(512,512);casement.shadow.bias=-.00065;casement.shadow.normalBias=.026;
   scene.add(casement,casement.target);
   let angle=0,target=0,slot=0,later=false,flare=0;
   function doorOpening(f,texture){
-    leaf.rotation.y=-1.42*smoothDoor(f);
+    const next=-1.42*smoothDoor(f);
+    if(leaf.rotation.y!==next)casement.shadow.needsUpdate=true;
+    leaf.rotation.y=next;
     if(texture&&reveal.material.map!==texture){reveal.material.map=texture;reveal.material.color.set(0xffffff);reveal.material.needsUpdate=true;}
   }
   function smoothDoor(f){return f*f*(3-2*f);}
@@ -205,14 +224,17 @@ export function hearthRoom(design){
     return 0;
   }
   const furniture=[[.21,.86,1.52,.78],[-1.97,-3.78,1.86,.83],[2.50,-3.71,1.93,.57],[-.65,-.31,.46,.45],[1,1.99,.46,.45],[-1.62,.85,.46,.45]];
+  function leafClear(x,z,y,angle,radius){
+    if(y>=1||x<3.02||z< -1.79||z>.25)return true;
+    const px=x-4.96,pz=z+1.41,s=Math.sin(angle),c=Math.cos(angle);
+    const along=clamp(px*s+pz*c,0,1.36);
+    return Math.hypot(px-along*s,pz-along*c)>=radius;
+  }
+  function doorClear(x,z,y,amount){return leafClear(x,z,y,-1.42*smoothDoor(amount),.255);}
   function canWalk(x,z,y,doorOpen=false){
     const inDoor=doorOpen&&y<1&&Math.abs(z+.72)<.47&&x>0&&x<w/2+.25;
     if((Math.abs(x)>w/2-.25&&!inDoor)||Math.abs(z)>d/2-.25)return false;
-    if(y<1&&x>3.1&&z>-1.76&&z<.22){
-      const px=x-4.96,pz=z+1.41,s=Math.sin(leaf.rotation.y),c=Math.cos(leaf.rotation.y);
-      const along=clamp(px*s+pz*c,0,1.36);
-      if(Math.hypot(px-along*s,pz-along*c)<.20)return false;
-    }
+    if(!leafClear(x,z,y,leaf.rotation.y,.235))return false;
     if(x>=-3.5&&x<-3.14&&z> -3.01&&z<2.96)return false;
     if(y<2.85)return !furniture.some(([xx,zz,rx,rz])=>Math.abs(x-xx)<rx&&Math.abs(z-zz)<rz);
     if(x>1.44&&x<3.95&&z>-3.66&&z<.08)return false;
@@ -223,7 +245,10 @@ export function hearthRoom(design){
     const flick=1+Math.sin(t*7.9)*.042+Math.sin(t*13.7)*.029;
     calc.scale.set(1+flare*.27,(1+flare*.60)*flick,1);calc.rotation.z=.041*Math.sin(t*3.2);
     fire.intensity=(13.1+flare*10)*flick;
+    const compression=flare>.52?Math.sin((1-flare)/.48*Math.PI):0;
+    lid.rotation.x=-.35+compression*.29;folds.scale.y=1-compression*.78;
   }
   colorDial();
-  return {scene,update,turn,select,chapter,floor,canWalk,doorOpening,stoke(){flare=1;},get flare(){return flare;},get later(){return later;},get slot(){return slot;},get destination(){return(later?newDoors:oldDoors)[slot];}};
+  return {scene,update,turn,select,chapter,floor,canWalk,doorClear,doorOpening,handles:{bellows:pumpHandle,dial:fingerKnob,door:latch},
+    stoke(){flare=1;},get flare(){return flare;},get later(){return later;},get slot(){return slot;},get destination(){return(later?newDoors:oldDoors)[slot];}};
 }

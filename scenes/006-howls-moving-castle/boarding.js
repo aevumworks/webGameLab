@@ -90,7 +90,7 @@ export function boarding(rig){
   ak.post(0,.5,0,.034,1,0xb09973,"brass");ak.finish(arm);
   sk.box(0,0,0,.20,.13,.15,0x676c62,"iron");sk.finish(slider);
   let base=0,fold=0;const up=new T.Vector3(0,1,0),p=new T.Vector3(),q=new T.Vector3();
-  function update(terrain,bodyHeight,scale,time,phase,speed,air,dt){
+  function update(terrain,bodyHeight,scale,shaft,speed,air,dt){
     rig.updateWorldMatrix(true,false);p.set(footX,0,footZ).applyMatrix4(rig.matrixWorld);
     base=(terrain(p.x,p.z)-bodyHeight)/scale+.032;
     const tucked=air>.06||speed>.16?1:0;fold=mix(fold,tucked,1-Math.exp(-dt*4.8));
@@ -98,7 +98,7 @@ export function boarding(rig){
     const footHeight=mix(base,.20,Math.min(1,air+fold));
     lower.scale.y=(middle-footHeight)/middle;lower.rotation.x=fold*2.45;
     pivot.rotation.y=fold*.88;
-    const cycle=time*.48+phase*.73;wheel.rotation.z=cycle;
+    const cycle=shaft*.5;wheel.rotation.z=cycle;
     p.copy(wheel.position);p.z-=.11;p.x+=Math.cos(cycle)*.27;p.y+=Math.sin(cycle)*.27;
     q.set(wheel.position.x+.72,p.y+Math.sqrt(Math.max(0,1.29**2-(p.x-wheel.position.x-.72)**2)),p.z);
     slider.position.copy(q);arm.position.copy(p);q.sub(p);arm.scale.y=q.length();arm.quaternion.setFromUnitVectors(up,q.normalize());

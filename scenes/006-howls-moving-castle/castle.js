@@ -3,50 +3,53 @@ import {house,rail} from "./buildings.js";
 import {boarding} from "./boarding.js";
 import {undercarriage} from "./undercarriage.js";
 import {engineDetails} from "./engine-details.js";
+import {fitTransmission} from "./drive-train.js";
+import {pilotLift} from "./pilot-lift.js";
 
-const iron=0x484a46, seam=0x363d3e, brass=0xb69558, rim=0x7e7961;
-const rust=[0x9c6953,0x8f6c59,0x7e6e61,0xa47358,0x8c6255,0x78776a,0x997b62];
-const blue=[0x62777a,0x708185,0x6a7375,0x70807d,0x816e67,0x667072];
-const red=[0x985b4c,0xaf694f,0xa76658,0x89594d,0xa0715c];
+const iron=0x293848, seam=0x202c38, brass=0xd8ae71, rim=0xa4ada8;
+const rust=[0xbc927b,0xc0977f,0xb98e7a,0xbf947c];
+const blue=[0x607b8d,0x607b8d,0x657f90];
+const red=[0xac6957,0xb1715c,0xac6957];
 
 function boiler(k,p,radii,palette,seed,rings=7,columns=17,openings=[]){
   const r=random(seed),[cx,cy,cz]=p,[rx,ry,rz]=radii;
-  const backing=openings.length?.79:.992;
-  k.ball(cx,cy,cz,rx*backing,ry*backing,rz*backing,seam,"iron");
+  const rows=Math.max(4,Math.round(rings*.76)),cols=Math.max(10,Math.round(columns*.78));
+  if(openings.length)k.ball(cx,cy,cz,rx*.82,ry*.82,rz*.82,seam,"iron");
   const sheet=new Surface();
-  function skin(a,lat,thick=1){
-    const cp=Math.cos(lat);
-    return [cx+rx*Math.sin(a)*cp*thick,cy+ry*Math.sin(lat)*thick,cz+rz*Math.cos(a)*cp*thick];
+  function skin(a,lat){
+    return new T.Vector3(cx+rx*Math.sin(a)*Math.cos(lat),cy+ry*Math.sin(lat),cz+rz*Math.cos(a)*Math.cos(lat));
   }
-  for(let row=0;row<rings;row++){
-    const low=-1.54+3.08*row/rings,high=low+3.08/rings;
-    const n=Math.max(7,Math.round(columns*Math.cos((low+high)/2))),offset=(row%2)*.39;
-    for(let i=0;i<n;i++){
-      const a=TAU*(i+offset)/n+.002,b=TAU*(i+1+offset)/n-.002,c=pick(r,palette);
-      const offsetR=1.002+r()*.009;
-      for(let h=0;h<3;h++)for(let j=0;j<4;j++){
-        const v0=mix(low+.002,high-.002,h/3),v1=mix(low+.002,high-.002,(h+1)/3);
-        const u0=mix(a,b,j/4),u1=mix(a,b,(j+1)/4);
-        if(openings.length){
-          const p=new T.Vector3(...skin((u0+u1)/2,(v0+v1)/2,offsetR));
-          if(openings.some(o=>p.distanceToSquared(o.point)<o.radius*o.radius*.94))continue;
-        }
-        sheet.quad(skin(u0,v0,offsetR),skin(u1,v0,offsetR),skin(u1,v1,offsetR),skin(u0,v1,offsetR),c);
-      }
-      for(const f of [.11,.52,.89]){
-        const v=skin(mix(a,b,f),high-.042,offsetR+.006);
-        k.put("pebble",v,[.063,.062,.063],row%2?rim:iron,"iron");
-      }
-      if(r()>.56) {
-        const u=mix(a,b,.22+r()*.5),v=high-.02;
-        sheet.quad(skin(u,v,offsetR+.003),skin(u+.015,v,offsetR+.003),skin(u+.007,v-.12-r()*.13,offsetR+.003),skin(u+.002,v-.15,offsetR+.003),tint(c,.65));
+  for(let row=0;row<rows;row++)for(let i=0;i<cols;i++){
+    const low=-Math.PI/2+Math.PI*row/rows,high=low+Math.PI/rows;
+    const a=TAU*(i+.5)/cols,b=a+TAU/cols;
+    const A=skin(a,low),B=skin(b,low),C=skin(b,high),D=skin(a,high),color=pick(r,palette);
+    const at=(u,v)=>A.clone().lerp(B,u).lerp(D.clone().lerp(C,u),v);
+    const center=at(.5,.5),reach=Math.max(center.distanceTo(A),center.distanceTo(C));
+    const ports=openings.filter(o=>center.distanceTo(o.point)<o.radius+reach);
+    const n=ports.length?5:1;
+    for(let h=0;h<n;h++)for(let j=0;j<n;j++){
+      const mid=at((j+.5)/n,(h+.5)/n);
+      if(ports.some(o=>mid.distanceToSquared(o.point)<o.radius**2*.89))continue;
+      sheet.quad(at(j/n,h/n).toArray(),at((j+1)/n,h/n).toArray(),at((j+1)/n,(h+1)/n).toArray(),at(j/n,(h+1)/n).toArray(),color);
+    }
+    // A bounded enamel print follows the cap surface and leaves the sight ports clear.
+    if(seed===52&&row===rows-2&&(i<3||i===cols-1)){
+      const painted=(u,v)=>{
+        const p=at(u,v),normal=new T.Vector3((p.x-cx)/(rx*rx),(p.y-cy)/(ry*ry),(p.z-cz)/(rz*rz)).normalize();
+        return p.addScaledVector(normal,.016).toArray();
+      };
+      for(let h=0;h<3;h++)for(let j=0;j<3;j++){
+        const column=((i+1)%cols)*3+j;
+        if(column<2+h||column>9+h||(column+h)%2)continue;
+        if(ports.some(o=>at((j+.5)/3,(h+.5)/3).distanceTo(o.point)<o.radius*1.23))continue;
+        sheet.quad(painted(j/3,h/3),painted((j+1)/3,h/3),painted((j+1)/3,(h+1)/3),painted(j/3,(h+1)/3),column>7?0xca9e84:0xdebf7e);
       }
     }
   }
   k.surface(sheet,"iron");
 }
 function girdle(k,x,y,z,rx,rz,height,palette,seed,wear=.15){
-  const r=random(seed),skin=new Surface(),n=27;
+  const r=random(seed),skin=new Surface(),n=16;
   for(let i=0;i<n;i++){
     const a=TAU*i/n+.003,b=TAU*(i+1)/n-.003,low=y-height/2-r()*wear,c=pick(r,palette);
     const v=(t,yy)=>[x+Math.sin(t)*rx,yy,z+Math.cos(t)*rz];
@@ -63,8 +66,8 @@ function vent(k,x,y,z,r,yaw=0,pitch=-.15,c=rim){
   k.at([x,y,z],[pitch,yaw,0],null,()=>{
     k.put(lip,[0,0,0],[r,r,r],c,"iron",[Math.PI/2,0,0]);
     k.put("disk",[0,0,-r*.235],[r*.75,r*.75,1],0x26373d,"glass");
-    for(let i=0;i<8;i++){
-      const a=TAU*i/8;k.put("pebble",[Math.sin(a)*r*.95,Math.cos(a)*r*.95,r*.39],[r*.066,r*.066,r*.043],0xb5a37b,"brass");
+    for(let i=0;i<4;i++){
+      const a=TAU*i/4;k.put("pebble",[Math.sin(a)*r*.95,Math.cos(a)*r*.95,r*.39],[r*.066,r*.066,r*.043],0xb5a37b,"brass");
     }
   });
 }
@@ -91,19 +94,16 @@ const chimneyTop=lathe("trumpet-flue",[[.65,0],[.74,.11],[.80,.42],[1.04,.70],[1
 function chimney(k,x,y,z,h,r,tilt,lean,sockets){
   const e=new T.Euler(tilt,0,lean,"YXZ");
   k.at([x,y,z],[tilt,0,lean],null,()=>{
-    k.ball(0,.18,0,r*1.40,r*1.16,r*1.4,0x75675e,"iron");
-    k.put("pipe",[0,h*.49,0],[r*.73,h*.96,r*.73],0x866e60,"iron");
-    for(let i=0;i<4;i++){
-      const yy=h*(.08+i*.245);
+    k.ball(0,.18,0,r*1.40,r*1.16,r*1.4,0x697581,"iron");
+    k.put("pipe",[0,h*.49,0],[r*.73,h*.96,r*.73],0x465062,"iron");
+    k.put("pipe",[0,h*.73,0],[r*.744,h*.21,r*.744],0xdcd5bc,"paint");
+    for(let i=0;i<3;i++){
+      const yy=h*(.08+i*.37);
       k.post(0,yy,0,r*(i===0?1.13:.92),i===0?.30:.17,i%2?rim:iron);
       k.post(0,yy+.11,0,r*.86,.055,0xb0916c,"brass");
     }
-    for(let i=0;i<5;i++){
-      const a=TAU*i/5;
-      k.line([r*.727*Math.sin(a),h*.16,r*.727*Math.cos(a)],[r*.727*Math.sin(a),h*.89,r*.727*Math.cos(a)],.027,0x4b514e);
-    }
-    k.put(chimneyTop,[0,h-.56*r,0],[r,r,r],0x9e8069,"iron");
-    k.post(0,h+.12*r,0,.79*r,.045,0x302f2d);
+    k.put(chimneyTop,[0,h-.56*r,0],[r,r,r],0xd1aa80,"iron");
+    k.post(0,h+.12*r,0,.79*r,.045,0x1f2c37);
     k.put("hoop",[0,h+.34*r,0],[r,r,r],0x514f46,"iron",[Math.PI/2,0,0]);
   });
   sockets.push(new T.Vector3(0,h+.45*r,0).applyEuler(e).add(new T.Vector3(x,y,z)));
@@ -125,7 +125,7 @@ function lanternTower(k,x,y,z,r,h){
 }
 
 function furnaceIntake(k){
-  const skin=new Surface(),panels=28,ry=.92;
+  const skin=new Surface(),panels=18,ry=.92;
   function lip(a,rx,h,z){
     const x=rx*Math.cos(a),y=6.50+Math.sin(a)*h+.12*(x/rx)**2;
     return [x,y,z-.48*(x/rx)**2+.035*Math.sin(a*3)];
@@ -136,13 +136,13 @@ function furnaceIntake(k){
     const A=lip(a,3.28,ry,6.70),B=lip(b,3.28,ry,6.70),C=lip(b,2.75,.65,6.78),D=lip(a,2.75,.65,6.78);
     skin.quad(A,B,C,D,color);
     skin.quad(lip(a,3.42,1.11,6.11),lip(b,3.42,1.11,6.11),B,A,tint(color,.73));
-    skin.quad(D,C,lip(b,2.44,.54,5.67),lip(a,2.44,.54,5.67),j<14?0x434342:0x5e554a);
+    skin.quad(D,C,lip(b,2.44,.54,5.67),lip(a,2.44,.54,5.67),j<panels/2?0x344449:0x715b4d);
     skin.tri([0,6.49,5.31],lip(a,2.44,.54,5.67),lip(b,2.44,.54,5.67),0x303739);
     if(j%2===0){const p=lip((a+b)/2,3.02,.81,6.76);k.put("pebble",p,[.050,.055,.042],0x8e8069,"iron");}
   }
   k.surface(skin,"iron");
-  for(let i=-5;i<=5;i++){
-    const x=i*.43,curve=Math.sqrt(1-(x/2.75)**2);
+  for(let i=-4;i<=4;i++){
+    const x=i*.53,curve=Math.sqrt(1-(x/2.75)**2);
     k.box(x,6.45+.30*curve,5.83-.21*(x/2.75)**2,.109,.42*curve,.18,0x575f58,"iron",[.19,0,x*.045]);
   }
 }
@@ -188,7 +188,6 @@ function decks(k){
   const cabins=[
     [[-3.55,9.16,3.94],-.22,[2.85,1.40,1.42],0xd0c5a8,0xb26950,-.045],
     [[2.58,10.78,3.93],.19,[3.04,1.38,1.36],0xdac9a4,0xa86348,.046],
-    [[5.45,8.37,1.87],1.02,[2.10,1.50,1.55],0xbfc3b0,0x936658,-.09],
     [[-5.72,8.04,-.26],-1.31,[2.06,1.44,1.54],0xc5ac86,0xb76e4f,.055],
     [[1.80,7.67,-4.32],2.92,[2.56,1.62,1.54],0xc7be9e,0x9f634b,-.085],
     [[-4.65,12.05,-1.00],-1.43,[2.10,1.52,1.62],0xccc3a6,0x93704c,.06],
@@ -232,8 +231,8 @@ export function buildCastle(card){
   const root=new T.Group(),rig=group(root),body=group(rig),early=group(body),late=group(body);
   const k=new Kit();lowerHull(k);
   boiler(k,[-.70,11.30,-1.48],[5.23,4.35,4.92],rust,142,7,21);
-  turret(k,[-3.31,12.16,2.98],[3.03,2.92,3.02],blue,32,[[-.43,.44,.48],[.23,.50,.47],[-1.17,.27,.36]]);
-  turret(k,[2.83,13.19,1.55],[3.17,3.03,3.16],rust,52,[[-.28,.50,.55],[.37,.47,.53],[1.31,.30,.38]]);
+  turret(k,[-3.31,12.16,2.98],[3.03,2.92,3.02],[0xa6b5bf,0xa8b7c0],32,[[-.43,.44,.48],[.23,.50,.47],[-1.17,.27,.36]]);
+  turret(k,[2.83,13.19,1.55],[3.17,3.03,3.16],[0xe0ded1,0xe4e0d3],52,[[-.28,.50,.55],[.37,.47,.53],[1.31,.30,.38]]);
   const back=new Kit();
   turret(back,[-2.57,15.22,-2.43],[3.58,3.01,3.20],blue,82,[[-.64,.51,.45]]);
   girdle(back,-2.57,15.32,-2.43,3.59,3.21,.62,[0xa7a68a,0xb6b299,0x9f9f89],81);
@@ -245,7 +244,7 @@ export function buildCastle(card){
   chimney(k,4.84,12.85,-3.58,6.32,.67,-.25,-.37,sockets);
   chimney(k,2.13,13.99,-4.16,5.35,.56,-.34,-.025,sockets);
   chimney(k,-3.88,14.86,-3.18,4.22,.51,-.04,.29,sockets);
-  // Rear entrance, steps, service pipes and flywheel.
+  // Rear service pipes and the auxiliary shaft on the opposite flank.
   for(const s of [-1,1])pipeRun(k,[[s*4.21,11.45,-2.75],[s*5.30,10.32,-3.11],[s*5.07,8.72,-3.48],[s*3.32,7.49,-4.77]],.17);
   const wheel=group(body,-5.48,7.47,2.12);wheel.rotation.y=-1.10;const blades=group(wheel),wk=new Kit();
   wk.put("rim",[0,0,0],[1.07,1.07,1.07],rim,"iron");wk.put("rim",[0,0,0],[.50,.50,.50],brass,"brass");
@@ -253,7 +252,7 @@ export function buildCastle(card){
   k.finish(body);
   const garden=new Kit(),r=random(502);
   cabin(garden,[-1.62,14.54,-1.42],.08,[3.72,1.58,2.14],0xdad6b2,0xaa604d);
-  for(let i=0;i<108;i++){
+  for(let i=0;i<37;i++){
     const a=r()*TAU,rad=2.25+r()*1.58,sz=.23+r()*.55;
     garden.put("boulder",[-.66+Math.cos(a)*rad,13.85+r()*1.17,-1.28+Math.sin(a)*rad*.70],[sz*1.1,sz*1.19,sz],pick(r,[0x567847,0x78954e,0x8b9e57,0x587748]),"leaf");
   }
@@ -266,18 +265,20 @@ export function buildCastle(card){
   garden.finish(late);late.visible=false;
   const wings=[fins(body,-1),fins(body,1)];
   const scale=card.design.walkingHeightM/21.18;rig.scale.setScalar(scale);
+  const transmission=fitTransmission(body);
+  const lift=pilotLift(rig,scale);lift.update(0,()=>0,0);
   const gear=undercarriage(rig,body,scale),gangway=boarding(rig);
   let airborne=false,previousTime=0;
   function form(fly){airborne=fly;early.visible=!fly;late.visible=fly;}
-  function pose(time,phase,motion,ground,flightBlend=0){
+  function pose(time,phase,motion,ground,flightBlend=0,shaft=phase*18/14){
     const wave=Math.sin(phase*2),bob=wave*.14*motion+Math.sin(time*1.15)*.018;
     body.position.y=bob;body.rotation.z=Math.sin(phase)*.023*motion;body.rotation.x=wave*.011*motion;
-    blades.rotation.z=time*.24+phase*1.65;
+    transmission.update(shaft,phase);blades.rotation.z=-shaft;
     for(let i=0;i<2;i++)wings[i].rotation.z=(i?1:-1)*(-.05+flightBlend*(-.87+Math.sin(time*2.3)*.15));
     gear.update(time,phase,motion,ground,flightBlend);
-    gangway.update(ground,root.position.y,scale,time,phase,motion,flightBlend,clamp(time-previousTime,0,.1));
+    gangway.update(ground,root.position.y,scale,shaft,motion,flightBlend,clamp(time-previousTime,0,.1));
     previousTime=time;
   }
   pose(0,.8,0,()=>0);
-  return {root,body,rig,sockets,scale,form,pose,gangway,gear,get flying(){return airborne;}};
+  return {root,body,rig,sockets,exhaust:transmission.puffPort,scale,form,pose,gangway,lift,gear,get flying(){return airborne;}};
 }

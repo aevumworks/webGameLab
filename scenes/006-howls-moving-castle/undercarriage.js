@@ -1,6 +1,6 @@
 import {T,TAU,Kit,group,clamp,mix,smooth} from "./atelier.js";
 
-const iron=0x545d57,bronze=0x9f8964,grease=0x454a44,up=new T.Vector3(0,1,0),axle=new T.Vector3(1,0,0);
+const iron=0x3b5a5d,bronze=0xcb9656,grease=0x344449,up=new T.Vector3(0,1,0),axle=new T.Vector3(1,0,0);
 const soleEnds=[[-.56,.033,.72],[0,.031,1.13],[.54,.034,.75],[.08,.034,-.61]];
 const ankleHeight=.38;
 const shortestAngle=a=>Math.atan2(Math.sin(a),Math.cos(a));
@@ -12,13 +12,13 @@ for(const [x,,z] of soleEnds){
   }
 }
 function makeLink(thigh){
-  const k=new Kit(),r=thigh?.22:.14;
+  const k=new Kit(),r=thigh?.26:.17;
   for(const sign of [-1,1]){
     k.line([sign*r,.08,0],[sign*r*.72,.88,0],thigh?.092:.059,iron,"iron","box");
     k.line([sign*r,.15,-.11],[sign*r*.73,.78,.10],.042,bronze,"brass");
   }
-  k.post(0,.35,0,r,.59,thigh?0x78816b:0x82735b);
-  k.post(0,.72,0,r*.63,.47,0xb4a587,"brass");
+  k.post(0,.35,0,r,.59,thigh?0x547d78:0xa26e48);
+  k.post(0,.72,0,r*.63,.47,0xe0c690,"brass");
   for(const y of [.08,.51,.60,.91])k.post(0,y,0,r*1.20,.051,grease);
   return k.finish();
 }

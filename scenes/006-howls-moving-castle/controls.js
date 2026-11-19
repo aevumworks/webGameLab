@@ -60,7 +60,7 @@ export function controls(canvas,action){
 }
 
 export function mechanicalSound(canvas){
-  let ctx;
+  let ctx,steamNoise;
   function enable(){
     if(!ctx){const Audio=window.AudioContext||window.webkitAudioContext;if(Audio)ctx=new Audio();}
     if(ctx?.state==="suspended")ctx.resume().catch(()=>{});
@@ -74,7 +74,19 @@ export function mechanicalSound(canvas){
     gain.gain.exponentialRampToValueAtTime(.0001,start+duration);osc.connect(gain).connect(ctx.destination);
     osc.start(start);osc.stop(start+duration+.01);
   }
-  return {step(){tone(108,39,.27,.065,"triangle");tone(347,117,.11,.019,"sine",.035);},
+  function exhaust(load){
+    if(ctx?.state!=="running")return;
+    if(!steamNoise){
+      steamNoise=ctx.createBuffer(1,Math.ceil(ctx.sampleRate*.19),ctx.sampleRate);
+      const samples=steamNoise.getChannelData(0);let smooth=0;
+      for(let i=0;i<samples.length;i++)samples[i]=smooth=.69*smooth+.31*(Math.random()*2-1);
+    }
+    const source=ctx.createBufferSource(),filter=ctx.createBiquadFilter(),gain=ctx.createGain(),t=ctx.currentTime;
+    source.buffer=steamNoise;filter.type="bandpass";filter.frequency.value=850+load*730;filter.Q.value=.62;
+    gain.gain.setValueAtTime(.0001,t);gain.gain.exponentialRampToValueAtTime(.018+.16*load,t+.022);
+    gain.gain.exponentialRampToValueAtTime(.0001,t+.18);source.connect(filter).connect(gain).connect(ctx.destination);source.start(t);
+  }
+  return {exhaust,step(){tone(108,39,.27,.065,"triangle");tone(347,117,.11,.019,"sine",.035);},
     dial(slot){tone(376+slot*67,361+slot*67,.35,.044);tone(774+slot*97,742+slot*97,.23,.018,"sine",.026);},
     fire(){tone(150,72,.39,.03,"triangle");},door(){tone(176,90,.25,.034,"triangle");}};
 }
